@@ -16,6 +16,22 @@ body{font-family:Inter, Arial, sans-serif;margin:0;background:#f7f7fb;color:#111
 .form-control{border-radius:8px}
 .navbar .btn{padding:0.2rem 0.6rem}
 
+/* Catalog CTA in navbar */
+.catalog-btn{border-radius:10px;padding:0.45rem 0.8rem;font-weight:600}
+.navbar-brand{font-size:1.15rem}
+.navbar .input-group .form-control{min-width:220px}
+
+/* Gifts grid: responsive card grid used in catalog */
+.gifts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+.gift-card{overflow:hidden}
+.gift-card .card-img-top{height:140px}
+
+/* subtle improvements */
+.toast-card{background:#fff;padding:12px;border-radius:10px;box-shadow:0 8px 24px rgba(20,30,80,0.06);margin-bottom:8px}
+.toast-success{border-left:4px solid #1e7e34}
+.toast-error{border-left:4px solid #c82333}
+.toast-info{border-left:4px solid #0d6efd}
+
 /* Category chips */
 #categories-bar{padding-bottom:4px}
 .category-chip{background:linear-gradient(180deg,#fff,#fbfcff);border:1px solid #eef2ff;transition:transform .12s ease,box-shadow .12s ease}
