@@ -1,0 +1,80 @@
+{% extends 'gifts/base.html' %}
+{% load static %}
+
+{% block title %}Каталог — GiftMate{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row">
+    <div class="col-lg-3 d-none d-lg-block">
+      <div class="card p-3 mb-3">
+        <h6 class="mb-3">Категорії</h6>
+        <div class="list-group categories-list">
+          <a href="{% url 'gifts:catalog' %}" class="list-group-item list-group-item-action {% if not selected_cat %}active{% endif %}">Всі</a>
+          {% for c in categories %}
+            <a href="{% url 'gifts:catalog' %}?category={{ c.id }}" class="list-group-item list-group-item-action {% if selected_cat == c.id %}active{% endif %}">{{ c.name }}</a>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="card p-3">
+        <h6 class="mb-2">Пошук</h6>
+        <form method="get" action="{% url 'gifts:catalog' %}">
+          <div class="input-group">
+            <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Пошук подарунків...">
+            <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-lg-9">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Каталог подарунків</h4>
+        <div class="small text-muted">{{ gifts.paginator.count|default:0 }} результатів</div>
+      </div>
+
+      <div class="gifts-grid">
+        {% for gift in gifts %}
+          <div class="gift-card card p-3">
+            {% if gift.image %}
+              <img src="{{ gift.image.url }}" class="card-img-top" alt="{{ gift.title }}">
+            {% endif %}
+            <div class="card-body p-2">
+              <h6 class="fw-semibold mb-1"><a href="{% url 'gifts:gift_detail' gift.id %}">{{ gift.title }}</a></h6>
+              <div class="text-muted small">{% if gift.category %}{{ gift.category.name }}{% endif %} • {{ gift.created_at|date:"d.m.Y" }}</div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="card p-3">
+            Немає подарунків за вашим запитом.
+          </div>
+        {% endfor %}
+      </div>
+
+      <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination">
+          {% if gifts.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ gifts.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_cat %}&category={{ selected_cat }}{% endif %}">Попередня</a></li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">Попередня</span></li>
+          {% endif %}
+
+          {% for num in gifts.paginator.page_range %}
+            {% if gifts.number == num %}
+              <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > gifts.number|add:'-3' and num < gifts.number|add:'3' %}
+              <li class="page-item"><a class="page-link" href="?page={{ num }}{% if q %}&q={{ q }}{% endif %}{% if selected_cat %}&category={{ selected_cat }}{% endif %}">{{ num }}</a></li>
+            {% endif %}
+          {% endfor %}
+
+          {% if gifts.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ gifts.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_cat %}&category={{ selected_cat }}{% endif %}">Далі</a></li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">Далі</span></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+{% endblock %}

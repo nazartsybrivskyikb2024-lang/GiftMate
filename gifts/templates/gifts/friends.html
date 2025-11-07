@@ -1,0 +1,135 @@
+{% extends "gifts/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h2>Мої друзі</h2>
+            
+            {% if pending %}
+                <div class="card mb-4">
+                    <div class="card-header bg-warning-subtle">
+                        <h5 class="card-title mb-0">Запити в друзі</h5>
+                    </div>
+                    <div class="list-group list-group-flush">
+                    {% for request in pending %}
+                        <div class="list-group-item d-flex align-items-center justify-content-between" id="request-{{ request.id }}">
+                            <div class="d-flex align-items-center">
+                                {% if request.sender.avatar %}
+                                    <img src="{{ request.sender.avatar.url }}" class="rounded-circle me-3" width="50" height="50" alt="{{ request.sender.display_name }}">
+                                {% else %}
+                                    <div class="rounded-circle bg-secondary me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <i class="fas fa-user text-white"></i>
+                                    </div>
+                                {% endif %}
+                                
+                                <div>
+                                    <h5 class="mb-1">
+                                        <a href="{% url 'gifts:view_profile' request.sender.user.username %}" class="text-decoration-none">
+                                            {{ request.sender.display_name|default:request.sender.user.username }}
+                                        </a>
+                                    </h5>
+                                    <small class="text-muted">@{{ request.sender.user.username }}</small>
+                                </div>
+                            </div>
+
+                            <div class="request-actions">
+                                <button class="btn btn-success btn-sm accept-request" data-request-id="{{ request.id }}">
+                                    <i class="fas fa-check"></i> Прийняти
+                                </button>
+                                <button class="btn btn-danger btn-sm decline-request" data-request-id="{{ request.id }}">
+                                    <i class="fas fa-times"></i> Відхилити
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if friends %}
+                <div class="card">
+                    <div class="list-group list-group-flush">
+                    {% for friend in friends %}
+                        <div class="list-group-item d-flex align-items-center">
+                            <div class="d-flex align-items-center flex-grow-1">
+                                {% if friend.avatar %}
+                                    <img src="{{ friend.avatar.url }}" class="rounded-circle me-3" width="50" height="50" alt="{{ friend.display_name }}">
+                                {% else %}
+                                    <div class="rounded-circle bg-secondary me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <i class="fas fa-user text-white"></i>
+                                    </div>
+                                {% endif %}
+                                
+                                <div>
+                                    <h5 class="mb-1">
+                                        <a href="{% url 'gifts:view_profile' friend.user.username %}" class="text-decoration-none">
+                                            {{ friend.display_name|default:friend.user.username }}
+                                        </a>
+                                    </h5>
+                                    <small class="text-muted">@{{ friend.user.username }}</small>
+                                </div>
+                            </div>
+                            
+                            <a href="{% url 'chat:new' %}?user={{ friend.user.username }}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-comment"></i> Написати
+                            </a>
+                        </div>
+                    {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    У вас поки немає друзів. <a href="{% url 'gifts:find_users' %}">Знайти друзів</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.accept-request').forEach(button => {
+    button.addEventListener('click', async (e) => {
+        const requestId = e.target.dataset.requestId;
+        try {
+            const response = await fetch(`/friends/accept/${requestId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            });
+            const data = await response.json();
+            if (data.status === 'accepted') {
+                document.querySelector(`#request-${requestId}`).remove();
+                location.reload(); // Оновимо сторінку, щоб показати нового друга
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    });
+});
+
+document.querySelectorAll('.decline-request').forEach(button => {
+    button.addEventListener('click', async (e) => {
+        const requestId = e.target.dataset.requestId;
+        try {
+            const response = await fetch(`/friends/decline/${requestId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            });
+            const data = await response.json();
+            if (data.status === 'declined') {
+                document.querySelector(`#request-${requestId}`).remove();
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

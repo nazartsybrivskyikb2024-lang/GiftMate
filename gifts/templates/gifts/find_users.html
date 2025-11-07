@@ -1,0 +1,120 @@
+{% extends "gifts/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h2>Пошук користувачів</h2>
+            
+            <form method="get" class="mb-4">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control" placeholder="Введіть ім'я користувача..." value="{{ query }}">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Пошук
+                    </button>
+                </div>
+            </form>
+
+            {% if users %}
+                <div class="card">
+                    <div class="list-group list-group-flush">
+                    {% for profile in users %}
+                        <div class="list-group-item d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                {% if profile.avatar %}
+                                    <img src="{{ profile.avatar.url }}" class="rounded-circle me-3" width="50" height="50" alt="{{ profile.display_name }}">
+                                {% else %}
+                                    <div class="rounded-circle bg-secondary me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <i class="fas fa-user text-white"></i>
+                                    </div>
+                                {% endif %}
+                                
+                                <div>
+                                    <h5 class="mb-1">
+                                        <a href="{% url 'gifts:view_profile' profile.user.username %}" class="text-decoration-none">
+                                            {{ profile.display_name|default:profile.user.username }}
+                                        </a>
+                                    </h5>
+                                    <small class="text-muted">@{{ profile.user.username }}</small>
+                                </div>
+                            </div>
+
+                            <div class="friend-actions" data-username="{{ profile.user.username }}">
+                                {% if user.is_authenticated %}
+                                    {# When user is logged in, show friend actions based on relationships. #}
+                                    {% if profile.user.username in friend_usernames %}
+                                        <span class="badge bg-success">Друзі</span>
+                                    {% else %}
+                                        <button class="btn btn-outline-primary btn-sm send-friend-request">
+                                            <i class="fas fa-user-plus"></i> Додати у друзі
+                                        </button>
+                                    {% endif %}
+                                {% else %}
+                                    <a href="{% url 'login' %}?next={% url 'gifts:find_users' %}" class="btn btn-outline-secondary btn-sm">
+                                        Увійдіть, щоб додати
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                    </div>
+                </div>
+
+                {% if users.has_other_pages %}
+                    <nav class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if users.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?q={{ query }}&page={{ users.previous_page_number }}">Назад</a>
+                                </li>
+                            {% endif %}
+
+                            {% for i in users.paginator.page_range %}
+                                <li class="page-item {% if users.number == i %}active{% endif %}">
+                                    <a class="page-link" href="?q={{ query }}&page={{ i }}">{{ i }}</a>
+                                </li>
+                            {% endfor %}
+
+                            {% if users.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?q={{ query }}&page={{ users.next_page_number }}">Вперед</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+
+            {% elif query %}
+                <div class="alert alert-info">
+                    Користувачів не знайдено за запитом "{{ query }}"
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.send-friend-request').forEach(button => {
+    button.addEventListener('click', async (e) => {
+        const username = e.target.closest('.friend-actions').dataset.username;
+        try {
+            const response = await fetch(`/friends/add/${username}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            });
+            const data = await response.json();
+            if (data.status === 'sent') {
+                e.target.outerHTML = '<span class="badge bg-warning">Очікує підтвердження</span>';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}
