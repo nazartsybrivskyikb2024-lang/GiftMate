@@ -3,5 +3,5 @@ services:
     name: giftmate-web
     env: python
     plan: free
-    buildCommand: "bash build.sh"
-    startCommand: "gunicorn giftmate_project.wsgi:application --workers 3 --bind 0.0.0.0:$PORT"
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python run_deploy.py"
