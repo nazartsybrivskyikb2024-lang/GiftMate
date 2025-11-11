@@ -6,3 +6,4 @@ gunicorn==21.2.0
 channels==4.3.1
 channels_redis==4.3.0
 daphne==4.1.2
+whitenoise==6.7.0
