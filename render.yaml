@@ -3,6 +3,5 @@ services:
     name: giftmate-web
     env: python
     plan: free
-    # Install deps, run migrations so DB tables (auth_user, etc.) exist, then collect static files
-    buildCommand: "pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py collectstatic --noinput"
+    buildCommand: "bash build.sh"
     startCommand: "gunicorn giftmate_project.wsgi:application --workers 3 --bind 0.0.0.0:$PORT"
