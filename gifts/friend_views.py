@@ -5,6 +5,7 @@ from django.db.models import Q
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
 from .models import Profile
+from .friends import Friend
 
 User = get_user_model()
 
@@ -43,7 +44,13 @@ def view_profile(request, username):
     """Перегляд профілю користувача"""
     user = get_object_or_404(User, username=username)
     profile = get_object_or_404(Profile, user=user)
-    is_friend = request.user.profile.is_friend_with(profile)
+    # ensure requesting user has a profile
+    try:
+        requester_profile, _ = Profile.objects.get_or_create(user=request.user)
+    except Exception:
+        requester_profile = None
+
+    is_friend = requester_profile.is_friend_with(profile) if requester_profile else False
     
     saved = []
     if is_friend:
@@ -59,7 +66,11 @@ def view_profile(request, username):
 @login_required
 def friend_list(request):
     """Список друзів"""
-    friends = request.user.profile.get_friends()
+    try:
+        requester_profile, _ = Profile.objects.get_or_create(user=request.user)
+        friends = requester_profile.get_friends()
+    except Exception:
+        friends = []
     
     return render(request, 'gifts/friends.html', {
         'friends': friends,
@@ -71,8 +82,12 @@ def add_friend(request, username):
     """Додати в друзі"""
     if request.method == 'POST':
         user_to_add = get_object_or_404(User, username=username)
-        if request.user.profile.add_friend(user_to_add.profile):
-            return JsonResponse({'status': 'added'})
+        try:
+            requester_profile, _ = Profile.objects.get_or_create(user=request.user)
+            if requester_profile.add_friend(user_to_add.profile):
+                return JsonResponse({'status': 'added'})
+        except Exception:
+            pass
     return JsonResponse({'status': 'error'}, status=400)
 
 @login_required
@@ -80,6 +95,10 @@ def remove_friend(request, username):
     """Видалити з друзів"""
     if request.method == 'POST':
         user_to_remove = get_object_or_404(User, username=username)
-        request.user.profile.remove_friend(user_to_remove.profile)
-        return JsonResponse({'status': 'removed'})
+        try:
+            requester_profile, _ = Profile.objects.get_or_create(user=request.user)
+            requester_profile.remove_friend(user_to_remove.profile)
+            return JsonResponse({'status': 'removed'})
+        except Exception:
+            pass
     return JsonResponse({'status': 'error'}, status=400)

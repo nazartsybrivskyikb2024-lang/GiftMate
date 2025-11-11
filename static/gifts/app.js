@@ -10,6 +10,66 @@ document.addEventListener('click', function(e){
         })
         const detailCount = document.getElementById('likes-count')
         if(detailCount) detailCount.textContent = d.likes_count
+        // --- Notifications (real-time) -------------------------------------------------
+        function initNotifications() {
+          if (!window.IS_AUTHENTICATED || !window.CURRENT_USER_ID) return;
+          const wsProto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+          const socketUrl = `${wsProto}://${window.location.host}/ws/notifications/`;
+          let sock = null;
+          const bell = document.getElementById('notification-bell');
+          const badge = document.getElementById('notification-count');
+
+          function showBadge(count) {
+            if (!badge) return;
+            badge.textContent = String(count);
+            badge.style.display = count > 0 ? 'inline-block' : 'none';
+          }
+
+          function connect() {
+            try {
+              sock = new WebSocket(socketUrl);
+              sock.onopen = () => {
+                console.log('Notifications socket connected');
+              };
+              sock.onmessage = (e) => {
+                try {
+                  const d = JSON.parse(e.data);
+                  // increment badge count (simple increment, server could send full count)
+                  const cur = parseInt(badge ? badge.textContent || '0' : '0') || 0;
+                  showBadge(cur + 1);
+                  // show small toast
+                  if (d && d.from) {
+                    showToast(`${d.from}: ${d.message_preview || 'Нове повідомлення'}`, 'info', 4000);
+                  }
+                } catch (err) {
+                  console.error('Invalid notification payload', err);
+                }
+              };
+              sock.onclose = () => {
+                console.warn('Notifications socket closed; retrying in 3s');
+                setTimeout(connect, 3000);
+              };
+              sock.onerror = (e) => {
+                console.warn('Notifications socket error', e);
+              };
+            } catch (e) {
+              console.warn('Notifications WS not available', e);
+            }
+          }
+
+          if (bell) {
+            bell.addEventListener('click', () => {
+              // on click, clear badge and optionally open a small notifications panel (not implemented yet)
+              showBadge(0);
+              showToast('Відкрийте розділ повідомлень (поки що тільки тест).', 'info', 2000);
+            });
+          }
+
+          connect();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() { initNotifications(); });
+
       })
   }
   if(e.target.matches('.save-btn')){

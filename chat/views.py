@@ -9,6 +9,8 @@ from django.utils.timezone import localtime
 from gifts.models import SavedItem
 from django.views.decorators.http import require_http_methods
 from django.shortcuts import HttpResponse
+from django.core.serializers import serialize
+from django.forms.models import model_to_dict
 
 
 @login_required
@@ -57,7 +59,8 @@ def conversation_view(request, conv_id):
 def send_message(request, conv_id):
     if request.method == 'POST':
         conv = get_object_or_404(Conversation, id=conv_id, participants=request.user)
-        text = request.POST.get('text')
+        text = request.POST.get('text', '')
+        photo = request.FILES.get('photo')
         fwd_id = request.POST.get('forwarded_gift_id')
         forwarded = None
         if fwd_id:
@@ -65,22 +68,28 @@ def send_message(request, conv_id):
                 forwarded = Gift.objects.get(id=int(fwd_id))
             except (Gift.DoesNotExist, ValueError):
                 forwarded = None
-        if text:
-            msg = Message.objects.create(conversation=conv, sender=request.user, text=text, forwarded_gift=forwarded)
-            # prepare timestamp for client
-            created_local = localtime(msg.created_at)
-            created_display = created_local.strftime('%H:%M')
-            data = {
-                'status': 'ok',
-                'id': msg.id,
-                'text': msg.text,
-                'sender': request.user.username,
-                'created_at': msg.created_at.isoformat(),
-                'created_at_display': created_display,
-            }
-            if forwarded:
-                data['forwarded'] = {'id': forwarded.id, 'title': forwarded.title, 'image': forwarded.image.url if forwarded.image else None}
-            return JsonResponse(data)
+        
+        msg = Message(conversation=conv, sender=request.user, text=text, forwarded_gift=forwarded)
+        if photo:
+            msg.photo = photo
+        msg.save()
+
+        # prepare timestamp for client
+        created_local = localtime(msg.created_at)
+        created_display = created_local.strftime('%H:%M')
+        data = {
+            'status': 'ok',
+            'id': msg.id,
+            'text': msg.text,
+            'sender': request.user.username,
+            'created_at': msg.created_at.isoformat(),
+            'created_at_display': created_display,
+        }
+        if msg.photo:
+            data['photo_url'] = msg.photo.url
+        if forwarded:
+            data['forwarded'] = {'id': forwarded.id, 'title': forwarded.title, 'image': forwarded.image.url if forwarded.image else None}
+        return JsonResponse(data)
     return JsonResponse({'status': 'error'}, status=400)
 
 
@@ -131,3 +140,41 @@ def forward_saved(request, conv_id):
         g = si.gift
         saved.append({'id': g.id, 'title': g.title, 'image': g.image.url if g.image else None})
     return render(request, 'chat/forward_saved.html', {'conversation': conv, 'saved_gifts': saved})
+
+
+@login_required
+def get_messages(request, conv_id):
+    """Return JSON list of messages for conversation conv_id newer than optional since_id.
+
+    GET params:
+      since_id - integer message id; only messages with id > since_id are returned.
+    """
+    conv = get_object_or_404(Conversation, id=conv_id, participants=request.user)
+    since = request.GET.get('since_id')
+    qs = conv.messages.all().order_by('created_at')
+    if since:
+        try:
+            since_id = int(since)
+            qs = qs.filter(id__gt=since_id)
+        except ValueError:
+            pass
+
+    data = []
+    for m in qs:
+        item = {
+            'id': m.id,
+            'text': m.text,
+            'sender': m.sender.username,
+            'created_at': m.created_at.isoformat(),
+            'created_at_display': m.created_at.astimezone().strftime('%H:%M'),
+        }
+        if m.photo:
+            item['photo_url'] = m.photo.url
+        if m.forwarded_gift_id:
+            item['forwarded'] = {
+                'id': m.forwarded_gift_id,
+                'title': getattr(m.forwarded_gift, 'title', None),
+                'image': m.forwarded_gift.image.url if getattr(m.forwarded_gift, 'image', None) else None,
+            }
+        data.append(item)
+    return JsonResponse({'messages': data})

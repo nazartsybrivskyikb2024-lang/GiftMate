@@ -5,87 +5,496 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>{% block title %}GiftMate{% endblock %}</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="" crossorigin="anonymous">
-    <link rel="stylesheet" href="{% static 'gifts/style.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'gifts/new-style.css' %}">
+    <style>
+    .navbar {
+        padding: 1rem 0;
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(10px);
+    }
+    
+    .navbar-brand {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary);
+        transition: all 0.3s ease;
+    }
+    
+    .navbar-brand:hover {
+        transform: scale(1.05);
+        color: var(--primary-dark);
+    }
+    
+    .nav-link {
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-link:hover {
+        background: var(--primary-light);
+        color: var(--primary);
+    }
+    
+    .navbar-search {
+        max-width: 600px;
+        width: 100%;
+    }
+    
+    .navbar-search .input-group {
+        border-radius: 2rem;
+        overflow: hidden;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .navbar-search .form-select {
+        border: none;
+        background-color: #f8f9fa;
+        padding-left: 1rem;
+    }
+    
+    .navbar-search .form-control {
+        border: none;
+        padding-left: 1rem;
+    }
+    
+    .navbar-search .btn {
+        padding: 0.5rem 1.5rem;
+        border-radius: 0;
+    }
+    
+    .profile-dropdown .avatar {
+        width: 36px;
+        height: 36px;
+        object-fit: cover;
+    }
+    
+    .notification-badge {
+        position: absolute;
+        top: 0;
+        right: 0;
+        transform: translate(25%, -25%);
+    }
+    
+    .navbar-nav .dropdown-menu {
+        border: none;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        border-radius: 1rem;
+        padding: 0.5rem;
+    }
+    
+    .dropdown-item {
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border-radius: 0.5rem;
+    }
+    
+    .dropdown-item:hover {
+        background-color: var(--primary-light);
+        color: var(--primary);
+    }
+    
+    .nav-icon {
+        width: 20px;
+        text-align: center;
+        margin-right: 0.5rem;
+        color: var(--primary);
+    }
+
+    .auth-buttons .nav-link {
+        border: 2px solid transparent;
+    }
+
+    .auth-buttons .nav-link:hover {
+        border-color: var(--primary);
+    }
+
+    .auth-buttons .nav-link.btn-primary {
+        border-color: var(--primary);
+    }
+
+    .auth-buttons .nav-link.btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+    }
+
+    @media (max-width: 991.98px) {
+        .navbar-search {
+            margin: 1rem 0;
+        }
+        
+        .navbar-collapse {
+            background: white;
+            padding: 1rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-top: 1rem;
+        }
+
+        .auth-buttons {
+            margin-top: 1rem;
+            display: grid;
+            gap: 0.5rem;
+        }
+    }
+    </style>
+    {% block extra_css %}{% endblock %}
   </head>
   <body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-white bg-white shadow-sm">
+    <!-- Enhanced Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-white bg-white shadow-sm sticky-top">
       <div class="container">
-        <a class="navbar-brand fw-bold" href="{% url 'gifts:home' %}">GiftMate</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
+        <!-- Brand -->
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'gifts:home' %}">
+          <i class="fas fa-gift me-2 text-gradient"></i>
+          GiftMate
+        </a>
+
+        <!-- Mobile Toggle -->
+        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
           <span class="navbar-toggler-icon"></span>
         </button>
+
+        <!-- Navbar Content -->
         <div class="collapse navbar-collapse" id="nav">
-          <ul class="navbar-nav ms-auto">
+          <!-- Global Search -->
+          <form class="navbar-search mx-lg-4" method="get" action="{% url 'gifts:catalog' %}">
+            <div class="input-group">
+              <select name="type" class="form-select border-0">
+                <option value="gifts">🎁 Подарунки</option>
+                <option value="users">👥 Користувачі</option>
+              </select>
+              <input name="q" class="form-control border-0" type="search" 
+                     placeholder="Пошук подарунків та друзів..." aria-label="Search">
+              <button class="btn btn-primary px-4" type="submit">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </form>
+          
+          <!-- Main Navigation -->
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" 
+                 href="{% url 'gifts:home' %}">
+                <i class="fas fa-home nav-icon"></i>Головна
+              </a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle {% if request.resolver_match.url_name == 'catalog' %}active{% endif %}" 
+                 href="#" data-bs-toggle="dropdown">
+                <i class="fas fa-gift nav-icon"></i>Каталог
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{% url 'gifts:catalog' %}">
+                  <i class="fas fa-border-all nav-icon"></i>Всі подарунки
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><h6 class="dropdown-header">Категорії</h6></li>
+                {% for category in categories %}
+                <li><a class="dropdown-item" href="{% url 'gifts:catalog' %}?category={{ category.id }}">
+                  <i class="fas fa-tag nav-icon"></i>{{ category.name }}
+                </a></li>
+                {% endfor %}
+              </ul>
+            </li>
             {% if user.is_authenticated %}
-              <li class="nav-item"><a class="nav-link" href="{% url 'chat:inbox' %}">Повідомлення</a></li>
-              <li class="nav-item"><a class="nav-link" href="{% url 'gifts:profile' %}">Мій профіль</a></li>
-              <li class="nav-item">
-                <form method="post" action="{% url 'logout' %}">{% csrf_token %}
-                  <button class="btn nav-link" style="border:none;background:none;padding:0">Вийти</button>
-                </form>
-              </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                <i class="fas fa-users nav-icon"></i>Соціальне
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{% url 'gifts:find_users' %}">
+                  <i class="fas fa-search nav-icon"></i>Знайти друзів
+                </a></li>
+                <li><a class="dropdown-item" href="{% url 'gifts:friend_list' %}">
+                  <i class="fas fa-user-friends nav-icon"></i>Мої друзі
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{% url 'chat:inbox' %}">
+                  <i class="fas fa-comments nav-icon"></i>Повідомлення
+                  <span id="unread-messages" class="badge bg-danger ms-1" style="display: none;">0</span>
+                </a></li>
+              </ul>
+            </li>
+            {% endif %}
+          </ul>
+
+          <!-- User Menu -->
+          <ul class="navbar-nav ms-auto {% if not user.is_authenticated %}auth-buttons{% endif %}">
+            {% if user.is_authenticated %}
+            <li class="nav-item me-3 position-relative">
+              <a class="nav-link p-2" href="#" id="notifications-toggle" data-bs-toggle="dropdown">
+                <i class="fas fa-bell"></i>
+                <span id="notification-count" class="notification-badge badge rounded-pill bg-danger" style="display: none;">0</span>
+              </a>
+              <div class="dropdown-menu dropdown-menu-end p-0" style="width: 320px;">
+                <div class="p-3 border-bottom">
+                  <h6 class="mb-0">Сповіщення</h6>
+                </div>
+                <div id="notifications-list" class="notifications-list p-0" style="max-height: 360px; overflow-y: auto;">
+                  <div class="text-center p-3 text-muted">
+                    <i class="fas fa-bell-slash mb-2"></i>
+                    <p class="small mb-0">Немає нових сповіщень</p>
+                  </div>
+                </div>
+              </div>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown">
+                {% if user.profile.avatar %}
+                  <img src="{{ user.profile.avatar.url }}" class="avatar rounded-circle me-2" 
+                       alt="{{ user.username }}">
+                {% else %}
+                  <div class="avatar rounded-circle bg-primary text-white me-2 d-flex align-items-center justify-content-center">
+                    {{ user.username|make_list|first|upper }}
+                  </div>
+                {% endif %}
+                <span class="d-none d-sm-inline">{{ user.profile.display_name|default:user.username }}</span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="{% url 'gifts:profile' %}">
+                  <i class="fas fa-user nav-icon"></i>Мій профіль
+                </a></li>
+                <li><a class="dropdown-item" href="{% url 'gifts:edit_profile' %}">
+                  <i class="fas fa-cog nav-icon"></i>Налаштування
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button class="dropdown-item text-danger">
+                      <i class="fas fa-sign-out-alt nav-icon"></i>Вийти
+                    </button>
+                  </form>
+                </li>
+              </ul>
+            </li>
             {% else %}
-              <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Увійти</a></li>
-              <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Реєстрація</a></li>
+              <li class="nav-item">
+                <a class="nav-link btn btn-outline-primary" href="{% url 'login' %}">
+                  <i class="fas fa-sign-in-alt nav-icon"></i>Увійти
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link btn btn-primary text-white" href="{% url 'register' %}">
+                  <i class="fas fa-user-plus nav-icon"></i>Реєстрація
+                </a>
+              </li>
             {% endif %}
           </ul>
         </div>
       </div>
     </nav>
 
-  <main class="container py-4">
-      <div class="row">
-        <div class="col-lg-2 d-none d-lg-block">
-          <!-- left sidebar (optional) -->
+    <main class="container py-4">
+      {% if not user.is_authenticated and not hide_sidebar %}
+        <div class="row justify-content-center mb-4">
+          <div class="col-12 col-md-8 col-lg-6">
+            <div class="card p-4 text-center border-0 shadow-sm rounded-4">
+              <div class="mb-3">
+                <i class="fas fa-gift fa-3x text-primary"></i>
+              </div>
+              <h4 class="mb-2">Ласкаво просимо до GiftMate</h4>
+              <p class="text-muted mb-4">Увійдіть або зареєструйтесь, щоб отримати доступ до всіх можливостей платформи</p>
+              <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <a href="{% url 'login' %}" class="btn btn-outline-primary px-4 py-2">
+                  <i class="fas fa-sign-in-alt me-2"></i>Увійти
+                </a>
+                <a href="{% url 'register' %}" class="btn btn-primary px-4 py-2">
+                  <i class="fas fa-user-plus me-2"></i>Реєстрація
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="col-lg-6">
+      {% endif %}
+
+      <div class="row">
+        <div class="col-lg-8">
           {% if messages %}
-            <div class="mb-3">
-              {% for m in messages %}
-                <div class="alert alert-{{ m.tags }}">{{ m }}</div>
+            <div class="messages mb-4">
+              {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
               {% endfor %}
             </div>
           {% endif %}
           {% block content %}{% endblock %}
         </div>
-        <div class="col-lg-4 d-none d-lg-block">
-          <!-- right sidebar: profile / suggestions -->
-          {% if not hide_sidebar %}
-          <div class="card mb-3 p-3">
-            {% if user.is_authenticated %}
-              <div class="d-flex align-items-center">
+
+        {% if user.is_authenticated and not hide_sidebar %}
+        <div class="col-lg-4">
+          <!-- Profile Card -->
+          <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center mb-3">
                 {% if user.profile.avatar %}
-                  <img src="{{ user.profile.avatar.url }}" class="rounded-circle me-2" width="56" height="56">
+                  <img src="{{ user.profile.avatar.url }}" class="rounded-circle me-3" width="64" height="64" 
+                       alt="{{ user.username }}">
                 {% else %}
-                  <div class="rounded-circle bg-secondary me-2" style="width:56px;height:56px"></div>
+                  <div class="rounded-circle bg-primary text-white me-3 d-flex align-items-center justify-content-center" 
+                       style="width: 64px; height: 64px; font-size: 24px;">
+                    {{ user.username|make_list|first|upper }}
+                  </div>
                 {% endif %}
                 <div>
-                  <div class="fw-bold">{{ user.profile.display_name|default:user.username }}</div>
-                  <div class="text-muted small">Ваш профіль</div>
+                  <h5 class="mb-1">{{ user.profile.display_name|default:user.username }}</h5>
+                  <p class="text-muted mb-0 small">
+                    <i class="fas fa-map-marker-alt me-1"></i>
+                    {{ user.profile.location|default:"Місцезнаходження не вказано" }}
+                  </p>
                 </div>
               </div>
-            {% else %}
-              <p><a href="{% url 'login' %}">Увійти</a> або <a href="{% url 'register' %}">зареєструватись</a></p>
-            {% endif %}
-              <hr />
-              <p class="mb-0"><a href="{% url 'chat:inbox' %}">Перейти до повідомлень</a></p>
+              <div class="row g-0 text-center mb-3">
+                <div class="col">
+                  <h6 class="mb-1">{{ user.profile.friends.count }}</h6>
+                  <small class="text-muted">Друзів</small>
+                </div>
+                <div class="col">
+                  <h6 class="mb-1">{{ user.likes.count }}</h6>
+                  <small class="text-muted">Вподобань</small>
+                </div>
+                <div class="col">
+                  <h6 class="mb-1">{{ user.saved_items.count }}</h6>
+                  <small class="text-muted">Збережено</small>
+                </div>
+              </div>
+              <div class="d-grid">
+                <a href="{% url 'gifts:edit_profile' %}" class="btn btn-outline-primary">
+                  <i class="fas fa-edit me-2"></i>Редагувати профіль
+                </a>
+              </div>
+            </div>
           </div>
-          {% endif %}
+
+          <!-- Quick Links -->
+          <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+              <h5 class="card-title mb-3">Швидкі дії</h5>
+              <div class="d-grid gap-2">
+                <a href="{% url 'gifts:find_users' %}" class="btn btn-light text-start">
+                  <i class="fas fa-search me-2"></i>Знайти друзів
+                </a>
+                <a href="{% url 'chat:inbox' %}" class="btn btn-light text-start position-relative">
+                  <i class="fas fa-comments me-2"></i>Повідомлення
+                  <span id="quick-unread" class="position-absolute top-0 end-0 translate-middle badge rounded-pill bg-danger" 
+                        style="display: none;">0</span>
+                </a>
+                <a href="{% url 'gifts:catalog' %}" class="btn btn-light text-start">
+                  <i class="fas fa-gift me-2"></i>Переглянути каталог
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
+        {% endif %}
       </div>
     </main>
 
-  <footer class="text-center text-muted py-4">© {% now "Y" %} GiftMate</footer>
+    <footer class="bg-white shadow-sm mt-5">
+      <div class="container py-4">
+        <div class="row align-items-center">
+          <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+            <a class="navbar-brand mb-2 d-inline-block" href="{% url 'gifts:home' %}">
+              <i class="fas fa-gift me-2 text-gradient"></i>
+              GiftMate
+            </a>
+            <p class="text-muted mb-0 small">© 2025 GiftMate. Всі права захищено.</p>
+          </div>
+          <div class="col-md-6 text-center text-md-end">
+            <a href="#" class="text-muted text-decoration-none me-3 small">Про нас</a>
+            <a href="#" class="text-muted text-decoration-none me-3 small">Правила користування</a>
+            <a href="#" class="text-muted text-decoration-none me-3 small">Конфіденційність</a>
+            <a href="#" class="text-muted text-decoration-none small">Контакти</a>
+          </div>
+        </div>
+      </div>
+    </footer>
 
-  <!-- Global toast container -->
-  <div id="global-toast" style="position:fixed;top:20px;right:20px;z-index:2000"></div>
+    <!-- Toast Container -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
+      <div id="global-toast" class="toast-container">
+      </div>
+    </div>
 
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script>
+      window.IS_AUTHENTICATED = {% if user.is_authenticated %}true{% else %}false{% endif %};
+    </script>
     <script src="{% static 'gifts/app.js' %}"></script>
+    {% if user.is_authenticated %}
     <link rel="stylesheet" href="{% static 'chat/style.css' %}">
-    <script src="{% static 'chat/chat.js' %}"></script>
+    <script src="{% static 'gifts/notifications.js' %}"></script>
+    {% endif %}
+
+    <script>
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+
+    // Toast function
+    function showToast(message, type = 'info') {
+      const toastContainer = document.getElementById('global-toast')
+      const toast = document.createElement('div')
+      toast.className = `toast align-items-center border-0 ${type === 'success' ? 'bg-success' : type === 'error' ? 'bg-danger' : 'bg-primary'} text-white`
+      toast.setAttribute('role', 'alert')
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body">
+            ${message}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      `
+      toastContainer.appendChild(toast)
+      const bsToast = new bootstrap.Toast(toast, {
+        animation: true,
+        autohide: true,
+        delay: 3000
+      })
+      bsToast.show()
+      toast.addEventListener('hidden.bs.toast', () => {
+        toast.remove()
+      })
+    }
+
+    // Handle active menu items
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get current URL path
+        const path = window.location.pathname;
+        
+        // Find and activate corresponding nav item
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            if (link.getAttribute('href') === path) {
+                link.classList.add('active');
+                
+                // If link is in dropdown, activate parent
+                const dropdownParent = link.closest('.dropdown');
+                if (dropdownParent) {
+                    dropdownParent.querySelector('.dropdown-toggle').classList.add('active');
+                }
+            }
+        });
+    });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
   </body>
-  </html>
+</html>

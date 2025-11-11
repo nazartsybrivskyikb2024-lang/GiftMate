@@ -1,4 +1,4 @@
-{% extends 'gifts/base.html' %}
+{% extends 'auth_base.html' %}
 
 {% block content %}
   <div class="d-flex justify-content-center">
@@ -9,11 +9,38 @@
           <div class="alert alert-{{ m.tags }}">{{ m }}</div>
         {% endfor %}
       {% endif %}
-      <form method="post">{% csrf_token %}
-        <div class="mb-2">{{ form.username.label_tag }} {{ form.username }}</div>
-        <div class="mb-2">{{ form.email.label_tag }} {{ form.email }}</div>
-        <div class="mb-2">{{ form.password.label_tag }} {{ form.password }}</div>
-        <div class="mb-3">{{ form.password2.label_tag }} {{ form.password2 }}</div>
+      <form method="post" novalidate>{% csrf_token %}
+        <div class="mb-3">
+          {{ form.username.label_tag }}
+          {{ form.username }}
+          {% if form.username.errors %}
+            <div class="text-danger small mt-1">{{ form.username.errors }}</div>
+          {% endif %}
+        </div>
+        <div class="mb-3">
+          {{ form.email.label_tag }}
+          {{ form.email }}
+          {% if form.email.errors %}
+            <div class="text-danger small mt-1">{{ form.email.errors }}</div>
+          {% endif %}
+        </div>
+        <div class="mb-3">
+          {{ form.password.label_tag }}
+          {{ form.password }}
+          {% if form.password.errors %}
+            <div class="text-danger small mt-1">{{ form.password.errors }}</div>
+          {% endif %}
+        </div>
+        <div class="mb-3">
+          {{ form.password2.label_tag }}
+          {{ form.password2 }}
+          {% if form.password2.errors %}
+            <div class="text-danger small mt-1">{{ form.password2.errors }}</div>
+          {% endif %}
+        </div>
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger mb-3">{{ form.non_field_errors }}</div>
+        {% endif %}
         <div class="d-grid"><button class="btn btn-primary">Зареєструватись</button></div>
       </form>
       <div class="text-center small mt-3">Вже маєте акаунт? <a href="{% url 'login' %}">Увійти</a></div>

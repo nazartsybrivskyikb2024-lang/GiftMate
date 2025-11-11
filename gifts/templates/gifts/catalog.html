@@ -4,77 +4,554 @@
 {% block title %}Каталог — GiftMate{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <div class="row">
-    <div class="col-lg-3 d-none d-lg-block">
-      <div class="card p-3 mb-3">
-        <h6 class="mb-3">Категорії</h6>
-        <div class="list-group categories-list">
-          <a href="{% url 'gifts:catalog' %}" class="list-group-item list-group-item-action {% if not selected_cat %}active{% endif %}">Всі</a>
-          {% for c in categories %}
-            <a href="{% url 'gifts:catalog' %}?category={{ c.id }}" class="list-group-item list-group-item-action {% if selected_cat == c.id %}active{% endif %}">{{ c.name }}</a>
-          {% endfor %}
-        </div>
-      </div>
-      <div class="card p-3">
-        <h6 class="mb-2">Пошук</h6>
-        <form method="get" action="{% url 'gifts:catalog' %}">
-          <div class="input-group">
-            <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Пошук подарунків...">
-            <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <div class="col-lg-9">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">Каталог подарунків</h4>
-        <div class="small text-muted">{{ gifts.paginator.count|default:0 }} результатів</div>
-      </div>
-
-      <div class="gifts-grid">
-        {% for gift in gifts %}
-          <div class="gift-card card p-3">
-            {% if gift.image %}
-              <img src="{{ gift.image.url }}" class="card-img-top" alt="{{ gift.title }}">
-            {% endif %}
-            <div class="card-body p-2">
-              <h6 class="fw-semibold mb-1"><a href="{% url 'gifts:gift_detail' gift.id %}">{{ gift.title }}</a></h6>
-              <div class="text-muted small">{% if gift.category %}{{ gift.category.name }}{% endif %} • {{ gift.created_at|date:"d.m.Y" }}</div>
+<!-- Hero Section -->
+<section class="hero-section mb-4 text-center py-5 rounded-4 position-relative overflow-hidden">
+    <div class="hero-bg"></div>
+    <div class="container py-4 position-relative">
+        <h1 class="display-5 text-white mb-3 fw-bold">Каталог подарунків</h1>
+        <p class="lead text-white-50 mb-4">Знайдіть ідеальний подарунок для будь-якого випадку</p>
+        
+        <!-- Large Search Form -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <form method="get" action="{% url 'gifts:catalog' %}" class="search-form">
+                    <div class="input-group input-group-lg shadow-lg">
+                        <input type="text" name="q" value="{{ q }}" 
+                               class="form-control border-0" placeholder="Пошук подарунків...">
+                        <button class="btn btn-light px-4" type="submit">
+                            <i class="fas fa-search me-2"></i>Знайти
+                        </button>
+                    </div>
+                </form>
             </div>
-          </div>
-        {% empty %}
-          <div class="card p-3">
-            Немає подарунків за вашим запитом.
-          </div>
-        {% endfor %}
-      </div>
-
-      <nav aria-label="Page navigation" class="mt-4">
-        <ul class="pagination">
-          {% if gifts.has_previous %}
-            <li class="page-item"><a class="page-link" href="?page={{ gifts.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_cat %}&category={{ selected_cat }}{% endif %}">Попередня</a></li>
-          {% else %}
-            <li class="page-item disabled"><span class="page-link">Попередня</span></li>
-          {% endif %}
-
-          {% for num in gifts.paginator.page_range %}
-            {% if gifts.number == num %}
-              <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-            {% elif num > gifts.number|add:'-3' and num < gifts.number|add:'3' %}
-              <li class="page-item"><a class="page-link" href="?page={{ num }}{% if q %}&q={{ q }}{% endif %}{% if selected_cat %}&category={{ selected_cat }}{% endif %}">{{ num }}</a></li>
-            {% endif %}
-          {% endfor %}
-
-          {% if gifts.has_next %}
-            <li class="page-item"><a class="page-link" href="?page={{ gifts.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_cat %}&category={{ selected_cat }}{% endif %}">Далі</a></li>
-          {% else %}
-            <li class="page-item disabled"><span class="page-link">Далі</span></li>
-          {% endif %}
-        </ul>
-      </nav>
+        </div>
     </div>
-  </div>
+</section>
+
+<div class="container-fluid px-4">
+    <div class="row">
+        <!-- Sidebar Filters -->
+        <div class="col-lg-3 mb-4">
+            <div class="filters-sidebar">
+                <!-- Categories Card -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-4">
+                            <i class="fas fa-tags text-primary me-2"></i>
+                            <h5 class="card-title mb-0">Категорії</h5>
+                        </div>
+                        <div class="list-group categories-list">
+                            <a href="{% url 'gifts:catalog' %}" 
+                               class="list-group-item border-0 mb-2 rounded-3 {% if not selected_cat %}active{% endif %}">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-border-all me-3"></i>
+                                    <span>Всі категорії</span>
+                                    <span class="ms-auto badge rounded-pill bg-light text-dark">
+                                        {{ gifts.paginator.count }}
+                                    </span>
+                                </div>
+                            </a>
+                            {% for c in categories %}
+                            <a href="{% url 'gifts:catalog' %}?category={{ c.id }}" 
+                               class="list-group-item border-0 mb-2 rounded-3 {% if selected_cat == c.id %}active{% endif %}">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-tag me-3"></i>
+                                    <span>{{ c.name }}</span>
+                                    <span class="ms-auto badge rounded-pill bg-light text-dark">
+                                        {{ c.gift_count }}
+                                    </span>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Filters -->
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-4">
+                            <i class="fas fa-filter text-primary me-2"></i>
+                            <h5 class="card-title mb-0">Фільтри</h5>
+                        </div>
+                        <form method="get" action="{% url 'gifts:catalog' %}">
+                            {% if selected_cat %}
+                            <input type="hidden" name="category" value="{{ selected_cat }}">
+                            {% endif %}
+                            
+                            <div class="mb-4">
+                                <label class="form-label">Сортування</label>
+                                <select name="sort" class="form-select" onchange="this.form.submit()">
+                                    <option value="newest" {% if sort == 'newest' %}selected{% endif %}>
+                                        Спочатку нові
+                                    </option>
+                                    <option value="popular" {% if sort == 'popular' %}selected{% endif %}>
+                                        Популярні
+                                    </option>
+                                    <option value="price_low" {% if sort == 'price_low' %}selected{% endif %}>
+                                        Спочатку дешевші
+                                    </option>
+                                    <option value="price_high" {% if sort == 'price_high' %}selected{% endif %}>
+                                        Спочатку дорожчі
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Ціновий діапазон</label>
+                                <div class="row g-2">
+                                    <div class="col">
+                                        <div class="input-group">
+                                            <span class="input-group-text border-0 bg-light">₴</span>
+                                            <input type="number" name="price_min" class="form-control" 
+                                                   placeholder="Від" value="{{ price_min }}">
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="input-group">
+                                            <span class="input-group-text border-0 bg-light">₴</span>
+                                            <input type="number" name="price_max" class="form-control" 
+                                                   placeholder="До" value="{{ price_max }}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Availability Filter -->
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="available" 
+                                           name="available" value="1" {% if request.GET.available %}checked{% endif %}>
+                                    <label class="form-check-label" for="available">
+                                        <i class="fas fa-check-circle text-success me-2"></i>Тільки доступні
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-filter me-2"></i>Застосувати фільтри
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <!-- Toolbar -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'gifts:home' %}" class="text-decoration-none">
+                                    <i class="fas fa-home me-1"></i>Головна
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">Каталог</li>
+                            {% if selected_category %}
+                            <li class="breadcrumb-item active">{{ selected_category.name }}</li>
+                            {% endif %}
+                        </ol>
+                    </nav>
+                </div>
+                
+                <div class="d-flex align-items-center gap-3">
+                    <span class="text-muted small">
+                        <i class="fas fa-gift me-1"></i>{{ gifts.paginator.count }} подарунків
+                    </span>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-light active" data-view="grid" title="Сітка">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                        <button type="button" class="btn btn-light" data-view="list" title="Список">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gifts Grid -->
+            <div class="gifts-grid" id="gifts-container">
+                {% for gift in gifts %}
+                <div class="gift-card card border-0 shadow-sm rounded-4 hover-lift">
+                    <div class="position-relative overflow-hidden">
+                        {% if gift.image %}
+                        <img src="{{ gift.image.url }}" class="card-img-top rounded-top-4" alt="{{ gift.title }}">
+                        {% else %}
+                        <div class="card-img-top d-flex align-items-center justify-content-center bg-light rounded-top-4" 
+                             style="height: 200px;">
+                            <i class="fas fa-gift fa-3x text-muted"></i>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Badges -->
+                        <div class="position-absolute top-0 start-0 m-3">
+                            {% if gift.category %}
+                            <span class="badge bg-primary mb-2 d-block shadow-sm">
+                                <i class="fas fa-tag me-1"></i>{{ gift.category.name }}
+                            </span>
+                            {% endif %}
+                            {% if gift.is_available %}
+                            <span class="badge bg-success shadow-sm">
+                                <i class="fas fa-check-circle me-1"></i>Доступний
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="position-absolute top-0 end-0 m-3">
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-light btn-sm rounded-circle shadow-sm" 
+                                        onclick="toggleLike({{ gift.id }})" title="Подобається">
+                                    <i class="{% if request.user in gift.likes.all %}fas{% else %}far{% endif %} fa-heart"></i>
+                                </button>
+                                <button class="btn btn-light btn-sm rounded-circle shadow-sm"
+                                        onclick="toggleSave({{ gift.id }})" title="Зберегти">
+                                    <i class="{% if request.user in gift.saveditem_set.all %}fas{% else %}far{% endif %} fa-bookmark"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        {% if gift.price %}
+                        <div class="position-absolute bottom-0 start-0 m-3">
+                            <span class="badge bg-light shadow-sm">
+                                <i class="fas fa-tag me-1"></i>{{ gift.price }} ₴
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <h5 class="card-title mb-2">
+                            <a href="{% url 'gifts:gift_detail' gift.id %}" class="text-decoration-none text-dark">
+                                {{ gift.title }}
+                            </a>
+                        </h5>
+                        {% if gift.description %}
+                        <p class="card-text text-muted small mb-3">
+                            {{ gift.description|truncatewords:15 }}
+                        </p>
+                        {% endif %}
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="text-muted small">
+                                    <i class="far fa-calendar me-1"></i>{{ gift.created_at|date:"d.m.Y" }}
+                                </span>
+                                <span class="text-muted small">
+                                    <i class="far fa-heart me-1"></i>{{ gift.likes.count }}
+                                </span>
+                            </div>
+                            <a href="{% url 'gifts:gift_detail' gift.id %}" 
+                               class="btn btn-primary btn-sm">
+                                <i class="fas fa-info-circle me-1"></i>Детальніше
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-search fa-3x text-muted"></i>
+                    </div>
+                    <h4>Подарунків не знайдено</h4>
+                    <p class="text-muted mb-4">
+                        Спробуйте змінити параметри пошуку або перегляньте інші категорії
+                    </p>
+                    <a href="{% url 'gifts:catalog' %}" class="btn btn-primary">
+                        <i class="fas fa-sync-alt me-2"></i>Переглянути всі подарунки
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if gifts.paginator.num_pages > 1 %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if gifts.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link rounded-start-3" 
+                           href="?page={{ gifts.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_cat %}&category={{ selected_cat }}{% endif %}">
+                            <i class="fas fa-chevron-left me-1"></i>Попередня
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in gifts.paginator.page_range %}
+                    {% if gifts.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > gifts.number|add:'-3' and num < gifts.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" 
+                           href="?page={{ num }}{% if q %}&q={{ q }}{% endif %}{% if selected_cat %}&category={{ selected_cat }}{% endif %}">
+                            {{ num }}
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if gifts.has_next %}
+                    <li class="page-item">
+                        <a class="page-link rounded-end-3" 
+                           href="?page={{ gifts.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_cat %}&category={{ selected_cat }}{% endif %}">
+                            Наступна<i class="fas fa-chevron-right ms-1"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero-section {
+    background: var(--primary);
+}
+
+.hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('/static/gifts/img/pattern.svg') center/cover;
+    opacity: 0.1;
+}
+
+.search-form .input-group {
+    border-radius: 2rem;
+    overflow: hidden;
+}
+
+.search-form .form-control {
+    height: 60px;
+    font-size: 1.1rem;
+}
+
+.search-form .btn {
+    padding: 0 2rem;
+    font-size: 1.1rem;
+}
+
+/* Categories List */
+.categories-list {
+    max-height: 400px;
+    overflow-y: auto;
+    margin: -0.5rem;
+    padding: 0.5rem;
+}
+
+.categories-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.categories-list::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 3px;
+}
+
+.categories-list::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 3px;
+}
+
+.categories-list .list-group-item {
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    border: none;
+    transition: all 0.2s ease;
+    background: #f8f9fa;
+}
+
+.categories-list .list-group-item:hover {
+    background: var(--primary-light);
+    transform: translateX(5px);
+}
+
+.categories-list .list-group-item.active {
+    background: var(--primary);
+    color: white;
+}
+
+/* Gifts Grid */
+.gifts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.gift-card {
+    transition: all 0.3s ease;
+}
+
+.gift-card:hover {
+    transform: translateY(-5px);
+}
+
+.gift-card .card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+/* List View */
+.gifts-grid.list-view {
+    display: block;
+}
+
+.gifts-grid.list-view .gift-card {
+    display: flex;
+    margin-bottom: 1rem;
+}
+
+.gifts-grid.list-view .gift-card .position-relative {
+    width: 200px;
+    flex-shrink: 0;
+}
+
+.gifts-grid.list-view .gift-card .card-body {
+    flex: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .gifts-grid.list-view .gift-card {
+        flex-direction: column;
+    }
+    
+    .gifts-grid.list-view .gift-card .position-relative {
+        width: 100%;
+    }
+
+    .search-form .form-control {
+        height: 50px;
+        font-size: 1rem;
+    }
+
+    .search-form .btn {
+        padding: 0 1.5rem;
+        font-size: 1rem;
+    }
+}
+
+/* Custom Form Controls */
+.form-control, .form-select {
+    border: 1px solid #e0e0e0;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.25rem rgba(var(--primary-rgb), 0.1);
+}
+
+/* Price Badge Animation */
+.gift-card:hover .badge {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Grid/List view toggle
+document.querySelectorAll('[data-view]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const view = e.currentTarget.dataset.view;
+        const container = document.getElementById('gifts-container');
+        
+        // Update buttons
+        document.querySelectorAll('[data-view]').forEach(b => b.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        
+        // Update view
+        if (view === 'list') {
+            container.classList.add('list-view');
+        } else {
+            container.classList.remove('list-view');
+        }
+        
+        // Save preference
+        localStorage.setItem('gifts-view', view);
+    });
+});
+
+// Load saved view preference
+const savedView = localStorage.getItem('gifts-view');
+if (savedView) {
+    document.querySelector(`[data-view="${savedView}"]`).click();
+}
+
+// Like/Save functionality
+function toggleLike(giftId) {
+    fetch(`/gifts/${giftId}/like/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'liked') {
+            showToast('Додано до уподобаних', 'success');
+        } else {
+            showToast('Видалено з уподобаних', 'info');
+        }
+        // Update UI
+        const btn = event.currentTarget;
+        const icon = btn.querySelector('i');
+        icon.classList.toggle('far');
+        icon.classList.toggle('fas');
+    });
+}
+
+function toggleSave(giftId) {
+    fetch(`/gifts/${giftId}/save/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'saved') {
+            showToast('Збережено', 'success');
+        } else {
+            showToast('Видалено зі збережених', 'info');
+        }
+        // Update UI
+        const btn = event.currentTarget;
+        const icon = btn.querySelector('i');
+        icon.classList.toggle('far');
+        icon.classList.toggle('fas');
+    });
+}
+
+// Helper function to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
 {% endblock %}

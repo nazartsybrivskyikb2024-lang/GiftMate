@@ -1,240 +1,138 @@
 {% extends 'gifts/base.html' %}
+{% load static %}
+{% block title %}Чат{% endblock %}
 
-{% block title %}Conversation{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'chat/style.css' %}">
+<link rel="stylesheet" href="https://unpkg.com/@yaireo/tagify/dist/tagify.css" />
+<script src="https://unpkg.com/@yaireo/tagify"></script>
+<link href="https://cdn.jsdelivr.net/npm/emoji-mart@latest/css/emoji-mart.css" rel="stylesheet">
+{% endblock %}
 
 {% block content %}
-  <div id="chat-root" data-conv-id="{{ conversation.id }}" class="chat-main">
-    <div class="chat-header">
-      <div class="me-3">
+<div id="chat-root" class="container py-3">
+  <div class="chat-panel">
+
+    <!-- Enhanced Chat Header -->
+    <div class="chat-header d-flex align-items-center justify-content-between border-bottom p-3">
+      <div class="d-flex align-items-center">
         {% if other and other.profile.avatar %}
-          <img src="{{ other.profile.avatar.url }}" width="48" height="48" class="rounded-circle">
+          <a href="{% url 'gifts:view_profile' other.username %}" class="d-block">
+            <img src="{{ other.profile.avatar.url }}" width="48" height="48" class="rounded-circle me-3 chat-avatar">
+          </a>
         {% else %}
-          <div class="rounded-circle bg-secondary" style="width:48px;height:48px"></div>
+          <div class="rounded-circle bg-secondary me-3" style="width:48px;height:48px;"></div>
         {% endif %}
+        <div>
+          <div class="fw-bold">
+            {% if other %}
+              <a href="{% url 'gifts:view_profile' other.username %}" class="text-decoration-none text-dark">
+                {{ other.profile.display_name|default:other.username }}
+              </a>
+            {% else %}
+              Розмова {{ conversation.id }}
+            {% endif %}
+          </div>
+          {% if other.profile.location %}
+            <div class="text-muted small"><i class="fas fa-map-marker-alt me-1"></i>{{ other.profile.location }}</div>
+          {% endif %}
+        </div>
       </div>
-      <div>
-        <div class="fw-bold">{% if other %}{{ other.profile.display_name|default:other.username }}{% else %}Розмова {{ conversation.id }}{% endif %}</div>
+      <div class="chat-actions">
+        <button class="btn btn-light btn-sm me-2" title="Пошук у повідомленнях">
+          <i class="fas fa-search"></i>
+        </button>
+        <div class="dropdown d-inline-block">
+          <button class="btn btn-light btn-sm" data-bs-toggle="dropdown">
+            <i class="fas fa-ellipsis-v"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="{% url 'gifts:view_profile' other.username %}">
+              <i class="fas fa-user me-2"></i>Переглянути профіль
+            </a></li>
+            <li><a class="dropdown-item" href="#">
+              <i class="fas fa-ban me-2"></i>Заблокувати
+            </a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="#">
+              <i class="fas fa-trash-alt me-2"></i>Видалити розмову
+            </a></li>
+          </ul>
+        </div>
       </div>
     </div>
 
-  <div class="chat-messages" id="messages">
+    <!-- 💬 Повідомлення -->
+    <div id="messages" class="chat-messages">
       {% for m in chat_messages %}
-        <div class="msg {% if m.sender == request.user %}me{% else %}them{% endif %}">
-          <div class="d-flex justify-content-between">
-            <div><strong>{% if m.sender == request.user %}Ви{% else %}{{ m.sender.username }}{% endif %}</strong></div>
-            <div class="text-muted small">{{ m.created_at|date:'H:i' }}</div>
-          </div>
-          <div class="mt-1">{{ m.text }}</div>
-          {% if m.forwarded_gift %}
-            <div class="forwarded-gift border p-2 mt-2 d-flex align-items-center">
-              {% if m.forwarded_gift.image %}
-                <img src="{{ m.forwarded_gift.image.url }}" width="64" height="64" class="me-2">
-              {% endif %}
-              <div>
-                <div class="fw-bold">Пересланий подарунок</div>
-                <a href="{% url 'gifts:gift_detail' m.forwarded_gift.id %}">{{ m.forwarded_gift.title }}</a>
-              </div>
+        <div class="message-wrapper {% if m.sender == request.user %}me{% else %}them{% endif %}" data-message-id="{{ m.id }}">
+          <div class="bubble">
+            <div class="meta">
+              <span class="username">{% if m.sender == request.user %}Ви{% else %}{{ m.sender.username }}{% endif %}</span>
+              <span class="time">{{ m.created_at|date:"H:i" }}</span>
             </div>
-          {% endif %}
+            {% if m.text %}
+              <div class="text">{{ m.text }}</div>
+            {% endif %}
+            {% if m.photo %}
+              <div class="photo-container">
+                <img src="{{ m.photo.url }}" alt="" class="chat-photo">
+              </div>
+            {% endif %}
+            {% if m.forwarded_gift %}
+              <div class="forwarded">
+                {% if m.forwarded_gift.image %}
+                  <img src="{{ m.forwarded_gift.image.url }}" class="gift-thumb" alt="">
+                {% endif %}
+                <div>
+                  <div class="fw-bold">🎁 {{ m.forwarded_gift.title }}</div>
+                  <a href="{% url 'gifts:gift_detail' m.forwarded_gift.id %}">Переглянути</a>
+                </div>
+              </div>
+            {% endif %}
+          </div>
         </div>
       {% empty %}
         <div class="text-center text-muted p-3">Почніть розмову — напишіть повідомлення нижче.</div>
       {% endfor %}
     </div>
 
-    <div class="chat-input">
-      <form id="msg-form" class="input-group">
-        <input name="text" class="form-control" placeholder="Написати повідомлення..." autocomplete="off">
-        <a id="share-input-btn" class="btn btn-outline-secondary" title="Поділитися подарунком" href="{% url 'chat:forward_saved' conversation.id %}">🔁</a>
-        <button class="btn btn-primary" type="submit">Відправити</button>
+    <!-- Enhanced Input Area -->
+    <div class="chat-input border-top bg-white p-3">
+      <form id="msg-form" class="d-flex flex-column gap-2" enctype="multipart/form-data">
+        <div id="photo-preview"></div>
+        <div class="input-group">
+          <input type="file" id="photo-input" style="display: none;" accept="image/*">
+          <button type="button" class="btn btn-light" onclick="document.getElementById('photo-input').click();" title="Додати фото">
+            <i class="fas fa-image"></i>
+          </button>
+          <input id="message-input" name="text" class="form-control form-control-lg" 
+                 placeholder="Написати повідомлення..." autocomplete="off">
+          <button type="button" class="btn btn-light" id="emoji-button" title="Додати емодзі">
+            <i class="far fa-smile"></i>
+          </button>
+          <a href="{% url 'chat:forward_saved' conversation.id %}" 
+             class="btn btn-light" title="Поділитися подарунком">
+            <i class="fas fa-gift"></i>
+          </a>
+          <button class="btn btn-primary px-4" type="submit">
+            <i class="fas fa-paper-plane me-1"></i>
+            Надіслати
+          </button>
+        </div>
       </form>
     </div>
-  </div>
 
-{% endblock %}
-
-{% block extra_js %}
-<!-- Saved gifts JSON for modal (from view context) -->
-<script id="saved-gifts-json" type="application/json">[
-{% for g in saved_gifts %}
-  {"id": {{ g.id }}, "title": "{{ g.title|escapejs }}", "image": {% if g.image %}"{{ g.image }}"{% else %}null{% endif %}}{% if not forloop.last %},{% endif %}
-{% endfor %}
-]</script>
-
-<!-- User conversations JSON (from view context) -->
-<script id="user-convs-json" type="application/json">[
-{% for c in user_conversations %}
-  {"id": {{ c.id }}, "label": "{{ c.label|escapejs }}" }{% if not forloop.last %},{% endif %}
-{% endfor %}
-]</script>
-<!-- Bootstrap-like modal with search and multi-select for conversations -->
-<div id="shareModal" class="d-none position-fixed top-0 start-0 w-100 h-100" style="background: rgba(0,0,0,0.45); z-index:1060;">
-  <div class="bg-white p-3 rounded" style="width:680px; margin:60px auto;">
-    <div class="d-flex justify-content-between align-items-center mb-2">
-      <h5 class="m-0">Поділитися подарунком</h5>
-      <div>
-        <button id="close-share-modal" class="btn btn-sm btn-light me-2">✖</button>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-6">
-        <input id="conv-search" class="form-control mb-2" placeholder="Пошук розмов або користувача...">
-        <div id="conversations-list" style="max-height:380px; overflow:auto; border:1px solid #e9ecef; padding:8px; border-radius:6px;"></div>
-      </div>
-          <div class="col-6">
-            <div class="mb-2"><strong>Збережені подарунки</strong></div>
-            <div id="saved-gifts-list" style="max-height:420px; overflow:auto; border:1px solid #e9ecef; padding:8px; border-radius:6px;"></div>
-            <div class="mt-2 text-muted small">Клікніть по подарунку, щоб одразу надіслати його в поточну розмову.</div>
-          </div>
-    </div>
+    <!-- Notification Sound -->
+    <audio id="notification-sound" preload="auto">
+      <source src="{% static 'chat/notification.mp3' %}" type="audio/mpeg">
+    </audio>
   </div>
 </div>
 
-<!-- Toasts container -->
-<div id="toast-container" style="position:fixed; top:20px; right:20px; z-index:2000;"></div>
-
 <script>
-const savedGifts = JSON.parse(document.getElementById('saved-gifts-json').textContent || '[]');
-// conversations passed from view
-const conversations = JSON.parse(document.getElementById('user-convs-json').textContent || '[]');
-
-function showToast(message, type='success'){
-  const id = 't'+Math.random().toString(36).slice(2,9);
-  const el = document.createElement('div');
-  el.id = id;
-  el.className = `alert alert-${type}`;
-  el.style.marginTop = '6px';
-  el.innerText = message;
-  document.getElementById('toast-container').appendChild(el);
-  setTimeout(()=>{ try{ el.remove(); }catch(e){} }, 3500);
-}
-
-function renderConversations(filter=''){
-  const list = document.getElementById('conversations-list');
-  list.innerHTML = '';
-  const f = filter.trim().toLowerCase();
-  conversations.filter(c=>!f || c.label.toLowerCase().includes(f) || String(c.id)===f).forEach(c=>{
-    const row = document.createElement('div');
-    row.className = 'form-check d-flex align-items-center justify-content-between p-2';
-    row.innerHTML = `<label class="form-check-label"> <input class="form-check-input me-2 conv-checkbox" type="checkbox" value="${c.id}"> ${escapeHtml(c.label)} </label>`;
-    list.appendChild(row);
-  });
-}
-
-function renderSavedGifts(){
-  const list = document.getElementById('saved-gifts-list');
-  list.innerHTML = '';
-  if(savedGifts.length===0){ list.innerHTML = '<p class="text-muted">Немає збережених подарунків.</p>'; return }
-  savedGifts.forEach(g=>{
-    const el = document.createElement('div');
-    el.className = 'd-flex align-items-center mb-2 p-2 border rounded saved-gift-item';
-    el.style.cursor = 'pointer';
-    el.dataset.giftId = g.id;
-    el.innerHTML = `
-      ${g.image? `<img src="${g.image}" width="70" height="70" class="me-2"/>` : ''}
-      <div class="flex-grow-1"> <div class="fw-bold">${escapeHtml(g.title)}</div> </div>
-    `;
-    // clicking the gift will immediately send it to current conversation
-    el.addEventListener('click', async function(){
-      const convId = document.getElementById('chat-root')?.dataset?.convId;
-      if(!convId){ showToast('Поточну розмову не знайдено','danger'); return }
-      const giftId = this.dataset.giftId;
-      showToast('Надсилаю подарунок...');
-      try{
-        const form = new FormData(); form.append('text','Поділився подарунком'); form.append('forwarded_gift_id', giftId);
-        const res = await fetch(`/chat/conversation/${convId}/send/`, {method:'POST', body: form, headers: {'X-CSRFToken': getCookie('csrftoken')}});
-        if(res.ok){
-          const data = await res.json();
-          appendMessageToDOM(data);
-          showToast('Подарунок надіслано');
-          document.getElementById('shareModal').classList.add('d-none');
-        } else {
-          showToast('Помилка відправлення','danger');
-        }
-      }catch(e){ showToast('Помилка мережі','danger'); console.error(e); }
-    });
-    list.appendChild(el);
-  });
-}
-
-let selectedGiftId = null;
-// open modal from the input-area share button
-function openShareModal(convId=null){
-  const modal = document.getElementById('shareModal');
-  modal.classList.remove('d-none');
-  modal.style.display = 'block';
-  modal.style.zIndex = '9999';
-  console.log('openShareModal called, convId=', convId);
-  try{ showToast('Відкриваю вікно поділитися...'); }catch(e){ console.log('toast err',e); }
-  renderConversations(); renderSavedGifts();
-  // preselect current conversation checkbox (or use provided convId)
-  const currentConvId = convId || document.getElementById('chat-root')?.dataset?.convId;
-  if(currentConvId){
-    setTimeout(()=>{
-      const cb = document.querySelector(`.conv-checkbox[value="${currentConvId}"]`);
-      if(cb) cb.checked = true;
-    }, 0);
-  }
-}
-// expose globally for onclick inline handlers
-window.openShareModal = openShareModal;
-
-// handle selects for gifts
-document.addEventListener('click', function(e){
-  if(e.target.classList.contains('select-gift-btn')){
-    // highlight selected
-    document.querySelectorAll('.select-gift-btn').forEach(b=>b.classList.remove('btn-primary'));
-    e.target.classList.add('btn-primary');
-    selectedGiftId = e.target.dataset.giftId;
-    console.log('selectedGiftId set to', selectedGiftId);
-    showToast('Подарунок обрано');
-  }
-});
-
-document.getElementById('conv-search').addEventListener('input', function(e){ renderConversations(e.target.value); });
-document.getElementById('close-share-modal').addEventListener('click', ()=>{ document.getElementById('shareModal').classList.add('d-none'); selectedGiftId=null; });
-
-document.getElementById('share-to-selected').addEventListener('click', async function(){
-  if(!selectedGiftId) return showToast('Оберіть подарунок', 'danger');
-  const checks = Array.from(document.querySelectorAll('.conv-checkbox:checked')).map(i=>i.value);
-  if(checks.length===0) return showToast('Оберіть хоч одну розмову', 'danger');
-  // send to each selected conversation
-  for(const convId of checks){
-    console.log('sending to conv', convId, 'gift', selectedGiftId);
-    const form = new FormData(); form.append('text','Поділився подарунком'); form.append('forwarded_gift_id', selectedGiftId);
-    try{
-      const res = await fetch(`/chat/conversation/${convId}/send/`, {method:'POST', body: form, headers: {'X-CSRFToken': getCookie('csrftoken')}});
-        if(res.ok){
-          showToast(`Подарунок відправлено в розмову ${convId}`,'success');
-          // if this is the current conversation, append message dynamically
-          const currentConvId = document.getElementById('chat-root')?.dataset?.convId;
-          if(String(convId)===String(currentConvId)){
-            const data = await res.json();
-            appendMessageToDOM(data);
-          }
-        } else {
-        showToast(`Помилка при відправці в ${convId}`,'danger');
-      }
-    }catch(err){ showToast('Network error','danger'); }
-  }
-  document.getElementById('shareModal').classList.add('d-none'); selectedGiftId=null;
-});
-
-function appendMessageToDOM(data){
-  // data expected: {id, text, sender}
-  const messages = document.getElementById('messages');
-  const div = document.createElement('div'); div.className='msg me';
-  const timeDisplay = data.created_at_display || 'зараз';
-  div.innerHTML = `
-    <div class="d-flex justify-content-between"><div><strong>Ви</strong></div><div class="text-muted small">${timeDisplay}</div></div>
-    <div class="mt-1">${escapeHtml(data.text)}</div>
-    ${data.forwarded? `<div class="forwarded-gift border p-2 mt-2 d-flex align-items-center"><img src="${data.forwarded.image||''}" width="64" height="64" class="me-2"><div><div class="fw-bold">Пересланий подарунок</div><a href="/gifts/${data.forwarded.id}/">${escapeHtml(data.forwarded.title)}</a></div></div>` : ''}
-  `;
-  messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
-}
-
-function escapeHtml(s){ return (s||'').replace(/[&<>\\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-function getCookie(name) { const value = `; ${document.cookie}`; const parts = value.split(`; ${name}=`); if (parts.length === 2) return parts.pop().split(';').shift(); }
+  const CHAT_ROOM_NAME = "{{ conversation.id }}";
+  const CURRENT_USERNAME = "{{ request.user.username|escapejs }}";
 </script>
+<script src="{% static 'chat/chat.js' %}"></script>
 {% endblock %}

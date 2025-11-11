@@ -1,38 +1,74 @@
 {% extends 'gifts/base.html' %}
+{% load static %}
 
 {% block title %}Профіль — GiftMate{% endblock %}
 
 {% block content %}
-  <div class="card mb-3 p-3">
-    <div class="d-flex align-items-center">
-      {% if profile and profile.avatar %}
-        <img class="avatar me-3" src="{{ profile.avatar.url }}" alt="avatar">
-      {% else %}
-        <div class="avatar bg-secondary me-3"></div>
-      {% endif %}
-      <div>
-        <h2 class="mb-0">{{ profile.display_name|default:user.username }}</h2>
-        <div class="text-muted small">@{{ user.username }}</div>
-        <p class="mt-2"><a href="{% url 'gifts:edit_profile' %}" class="btn btn-sm btn-outline-primary">Редагувати профіль</a></p>
-      </div>
-    </div>
-  </div>
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        {% if profile and profile.avatar %}
+                            <img src="{{ profile.avatar.url }}" class="rounded-circle mb-3" width="150" height="150" alt="{{ profile.display_name }}">
+                        {% else %}
+                            <div class="rounded-circle bg-secondary mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
+                                <i class="fas fa-user fa-4x text-white"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <h2 class="mb-0">{{ profile.display_name|default:user.username }}</h2>
+                        <p class="text-muted">@{{ user.username }}</p>
+                        
+                        {% if profile.bio %}
+                            <p class="mt-3">{{ profile.bio }}</p>
+                        {% endif %}
+                        
+                        <div class="mt-3">
+                            <a href="{% url 'gifts:edit_profile' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-edit"></i> Редагувати профіль
+                            </a>
+                            <a href="{% url 'gifts:friend_list' %}" class="btn btn-outline-info ms-2">
+                                <i class="fas fa-users"></i> Мої друзі
+                            </a>
+                            <a href="{% url 'gifts:find_users' %}" class="btn btn-outline-success ms-2">
+                                <i class="fas fa-search"></i> Знайти друзів
+                            </a>
+                        </div>
+                    </div>
 
-  <h4 class="mb-3">Збережені подарунки</h4>
-  <div class="row g-3">
-    {% for item in saved %}
-      <div class="col-6 col-md-4">
-        <div class="card h-100">
-          {% if item.gift.image %}
-            <img src="{{ item.gift.image.url }}" class="card-img-top" style="height:160px;object-fit:cover" />
-          {% endif %}
-          <div class="card-body p-2">
-            <div class="small fw-bold">{{ item.gift.title }}</div>
-          </div>
+                    <h4 class="mb-3">Збережені подарунки</h4>
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                        {% for item in saved %}
+                            <div class="col">
+                                <div class="card h-100">
+                                    {% if item.gift.image %}
+                                        <img src="{{ item.gift.image.url }}" class="card-img-top" style="height: 160px; object-fit: cover" alt="{{ item.gift.title }}">
+                                    {% endif %}
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ item.gift.title }}</h5>
+                                        <p class="card-text small">{{ item.gift.description|truncatewords:20 }}</p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <a href="{% url 'gifts:gift_detail' item.gift.id %}" class="btn btn-sm btn-outline-primary">Детальніше</a>
+                                            <button class="btn btn-sm btn-outline-primary share-gift" data-gift-id="{{ item.gift.id }}">
+                                                <i class="fas fa-share"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="col-12">
+                                <div class="alert alert-info text-center">
+                                    <i class="fas fa-info-circle me-2"></i> Ви ще не зберегли жодного подарунка
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    {% empty %}
-      <p>Ще нічого не збережено.</p>
-    {% endfor %}
-  </div>
+    </div>
+</div>
 {% endblock %}

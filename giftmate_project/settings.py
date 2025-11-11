@@ -35,6 +35,7 @@ ALLOWED_HOSTS = ['gift-8y4v.onrender.com', 'localhost', '127.0.0.1', '0.0.0.0']
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'gifts',
     'chat',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -73,9 +75,20 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'giftmate_project.wsgi.application'
+ASGI_APPLICATION = 'giftmate_project.asgi.application'
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
+# Configure Channels for WebSocket support
+# (Optional) channels_presence removed to avoid import errors when not used.
+
+# Configure file uploads
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
