@@ -27,9 +27,21 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-5wkldfg!6@@!hr
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
-# Hosts allowed to serve the app. Update in production or export DJANGO_ALLOWED_HOSTS env var as comma separated
-# Allow common local development hosts by default. In production, set DJANGO_ALLOWED_HOSTS.
-ALLOWED_HOSTS = ['gift-8y4v.onrender.com', 'localhost', '127.0.0.1', '0.0.0.0']
+# Hosts allowed to serve the app. You can set DJANGO_ALLOWED_HOSTS as a comma-separated
+# environment variable in production (recommended). Otherwise the default list below
+# will be used — we include the likely Render domain(s) used for this project.
+allowed_hosts_env = os.environ.get('DJANGO_ALLOWED_HOSTS')
+if allowed_hosts_env:
+    # split by comma and strip whitespace
+    ALLOWED_HOSTS = [h.strip() for h in allowed_hosts_env.split(',') if h.strip()]
+else:
+    ALLOWED_HOSTS = [
+        'gift-8y4v.onrender.com',
+        'giftmate.onrender.com',
+        'localhost',
+        '127.0.0.1',
+        '0.0.0.0',
+    ]
 
 
 # Application definition
