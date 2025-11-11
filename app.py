@@ -91,6 +91,9 @@ print("=" * 70)
 # Export the Django WSGI application for gunicorn
 from giftmate_project.wsgi import application
 
+# Alias for compatibility with 'gunicorn app:app' command
+app = application
+
 # If this file is run as a script (not imported by gunicorn),
 # start gunicorn manually
 if __name__ == '__main__':
