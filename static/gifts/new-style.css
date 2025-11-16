@@ -139,6 +139,12 @@ body {
   transition: var(--transition);
 }
 
+.navbar .avatar {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+}
+
 .avatar:hover {
   transform: scale(1.05);
   box-shadow: var(--shadow);
