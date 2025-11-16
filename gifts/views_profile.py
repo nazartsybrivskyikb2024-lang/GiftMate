@@ -24,6 +24,7 @@ def view_profile(request, username_or_id):
             requester_profile = None
 
         is_friend = requester_profile.is_friend_with(profile) if requester_profile else False
+        has_pending = requester_profile.has_pending_request_with(profile) if requester_profile else False
         
         saved = []
         if is_friend or user == request.user:
@@ -32,6 +33,7 @@ def view_profile(request, username_or_id):
         return render(request, 'gifts/view_profile.html', {
             'profile': profile,
             'is_friend': is_friend,
+            'has_pending': has_pending,
             'saved': saved,
             'hide_sidebar': True
         })
