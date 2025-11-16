@@ -1,6 +1,8 @@
 from django.db import models
 from django.conf import settings
 
+from .friends import Friend
+
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -76,11 +78,17 @@ class Profile(models.Model):
 
     def get_pending_friend_requests(self):
         """Повертає QuerySet вхідних запитів в друзі"""
-        try:
-            from .friends import Friend
-            return Friend.objects.filter(receiver=self, status='pending')
-        except Exception:
-            return Profile.objects.none()
+        return Friend.objects.filter(receiver=self, status='pending').select_related('sender__user')
+
+    def has_pending_request_with(self, profile):
+        """Перевіряє чи є незавершений запит між двома профілями"""
+        if profile == self:
+            return False
+        from django.db.models import Q
+        return Friend.objects.filter(
+            Q(sender=self, receiver=profile) | Q(sender=profile, receiver=self),
+            status='pending'
+        ).exists()
 
 
 class Comment(models.Model):
