@@ -256,8 +256,8 @@
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown">
                 {% if user.profile.avatar %}
-                  <img src="{{ user.profile.avatar.url }}" class="avatar rounded-circle me-2" 
-                       alt="{{ user.username }}">
+                  <img src="{{ user.profile.avatar.url }}" class="avatar rounded-circle me-2"
+                       width="36" height="36" alt="{{ user.username }}">
                 {% else %}
                   <div class="avatar rounded-circle bg-primary text-white me-2 d-flex align-items-center justify-content-center">
                     {{ user.username|make_list|first|upper }}

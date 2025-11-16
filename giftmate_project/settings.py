@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from urllib.parse import urlparse, parse_qsl
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -105,12 +106,44 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+def _build_database_settings() -> dict:
+    database_url = os.environ.get('DATABASE_URL')
+    if not database_url:
+        return {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+
+    url = urlparse(database_url)
+    if url.scheme not in ('postgres', 'postgresql'):
+        raise ValueError('Unsupported database scheme in DATABASE_URL')
+
+    options = dict(parse_qsl(url.query))
+    if os.environ.get('DB_SSL_REQUIRE', 'True') == 'True':
+        options.setdefault('sslmode', 'require')
+
+    config = {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': url.path.lstrip('/'),
+        'USER': url.username or '',
+        'PASSWORD': url.password or '',
+        'HOST': url.hostname or '',
+        'PORT': str(url.port) if url.port else '',
+        'CONN_MAX_AGE': 600,
     }
+
+    if options:
+        config['OPTIONS'] = options
+
+    return config
+
+
+DATABASES = {
+    'default': _build_database_settings()
 }
+
+if DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
+    DATABASES['default'].pop('CONN_MAX_AGE', None)
 
 
 # Password validation
