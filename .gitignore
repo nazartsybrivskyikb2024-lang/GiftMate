@@ -68,3 +68,13 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+# Replit
+.replit
+.config/
+.pythonlibs/
+replit.nix
+.upm/
+.cache/
+venv/
+.migrations_done
+.collectstatic_done
