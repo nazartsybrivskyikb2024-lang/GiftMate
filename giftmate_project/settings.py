@@ -170,3 +170,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Authentication redirects
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'gifts:home'
+
+# Replit Environment Configuration
+replit_dev_domain = os.environ.get('REPLIT_DEV_DOMAIN')
+if replit_dev_domain:
+    ALLOWED_HOSTS.append(replit_dev_domain)
+    ALLOWED_HOSTS.append('*.replit.dev')
+
+# CSRF Configuration for Replit
+if not hasattr(globals(), 'CSRF_TRUSTED_ORIGINS'):
+    CSRF_TRUSTED_ORIGINS = []
+if replit_dev_domain:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{replit_dev_domain}')
+
+# Allow Django to work behind Replit's proxy
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
