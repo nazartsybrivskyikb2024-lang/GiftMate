@@ -1,5 +1,9 @@
 from django.db import models
 from django.conf import settings
+from PIL import Image
+from io import BytesIO
+from django.core.files.base import ContentFile
+import os
 
 from .friends import Friend
 
