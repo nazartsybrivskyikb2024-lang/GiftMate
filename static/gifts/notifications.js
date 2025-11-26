@@ -91,7 +91,31 @@ function initNotificationWebSocket() {
             count += 1;
             badge.textContent = count;
             badge.style.display = count > 0 ? 'block' : 'none';
+            
+            // Додати повідомлення в меню сповіщень
+            addNotificationToMenu(data);
         }
+    }
+    
+    function addNotificationToMenu(data) {
+        const dropdown = document.querySelector('.notification-dropdown-menu');
+        if (!dropdown) return;
+        
+        const notifItem = document.createElement('li');
+        notifItem.className = 'dropdown-item';
+        notifItem.innerHTML = `
+            <div class="small">
+                <strong>${data.from}</strong>
+                <div class="text-muted">${data.message_preview || 'Нове повідомлення'}</div>
+            </div>
+        `;
+        notifItem.style.cursor = 'pointer';
+        if (data.conversation_id) {
+            notifItem.onclick = () => {
+                window.location.href = `/chat/conversation/${data.conversation_id}/`;
+            };
+        }
+        dropdown.insertBefore(notifItem, dropdown.firstChild);
     }
 
     // Start the connection

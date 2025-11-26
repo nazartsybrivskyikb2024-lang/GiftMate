@@ -119,6 +119,14 @@
   border: 1px solid #e9ecef;
 }
 
+.message-wrapper.them .bubble .meta {
+  color: #333;
+}
+
+.chat-input .form-control {
+  color: #000;
+}
+
 .bubble:hover {
   transform: translateY(-1px);
 }
@@ -391,12 +399,14 @@
   .chat-input .btn {
     width: 38px;
     height: 38px;
+    border-radius: 8px !important;
   }
   
   .chat-input .btn-primary {
     flex: 1;
     order: 2;
     max-width: none;
+    border-radius: 8px !important;
   }
   
   #emoji-picker {
