@@ -74,14 +74,15 @@
 {% block extra_js %}
 {% if not is_friend and not has_pending %}
 <script>
-if (!window.csrfTokenInput) {
-    window.csrfTokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
-}
-const csrfToken = window.csrfTokenInput ? window.csrfTokenInput.value : '';
-const sendFriendButton = document.querySelector('.send-friend-request');
+(function() {
+    if (!window.csrfTokenInput) {
+        window.csrfTokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    }
+    const csrfToken = window.csrfTokenInput ? window.csrfTokenInput.value : '';
+    const sendFriendButton = document.querySelector('.send-friend-request');
 
-if (sendFriendButton) {
-sendFriendButton.addEventListener('click', async (e) => {
+    if (sendFriendButton) {
+        sendFriendButton.addEventListener('click', async (e) => {
     const username = e.target.dataset.username;
     try {
         const response = await fetch(`/friends/add/${username}/`, {
@@ -106,9 +107,10 @@ sendFriendButton.addEventListener('click', async (e) => {
         }
     } catch (error) {
         console.error('Error:', error);
+        }
+    });
     }
-});
-}
+})();
 </script>
 {% endif %}
 {% endblock %}

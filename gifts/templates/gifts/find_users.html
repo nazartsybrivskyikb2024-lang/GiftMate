@@ -97,12 +97,13 @@
 
 {% block extra_js %}
 <script>
-if (!window.csrfTokenInput) {
-    window.csrfTokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
-}
-const csrfToken = window.csrfTokenInput ? window.csrfTokenInput.value : '';
+(function() {
+    if (!window.csrfTokenInput) {
+        window.csrfTokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    }
+    const csrfToken = window.csrfTokenInput ? window.csrfTokenInput.value : '';
 
-document.querySelectorAll('.send-friend-request').forEach(button => {
+    document.querySelectorAll('.send-friend-request').forEach(button => {
     button.addEventListener('click', async (e) => {
         const username = e.target.closest('.friend-actions').dataset.username;
         try {
@@ -122,7 +123,8 @@ document.querySelectorAll('.send-friend-request').forEach(button => {
             console.error('Error:', error);
         }
     });
-});
+    });
+})();
 </script>
 {% endblock %}
 {% endblock %}

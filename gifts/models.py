@@ -93,6 +93,23 @@ class Profile(models.Model):
             Q(sender=self, receiver=profile) | Q(sender=profile, receiver=self),
             status='pending'
         ).exists()
+    
+    def save(self, *args, **kwargs):
+        if self.avatar:
+            try:
+                img = Image.open(self.avatar)
+                if img.mode != 'RGB':
+                    img = img.convert('RGB')
+                max_size = (400, 400)
+                img.thumbnail(max_size, Image.Resampling.LANCZOS)
+                thumb_io = BytesIO()
+                img.save(thumb_io, format='JPEG', quality=85)
+                thumb_io.seek(0)
+                filename = os.path.splitext(self.avatar.name)[0] + '.jpg'
+                self.avatar.save(filename, ContentFile(thumb_io.read()), save=False)
+            except Exception:
+                pass
+        super().save(*args, **kwargs)
 
 
 class Comment(models.Model):

@@ -90,12 +90,13 @@
 
 {% block extra_js %}
 <script>
-if (!window.csrfTokenInput) {
-    window.csrfTokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
-}
-const csrfToken = window.csrfTokenInput ? window.csrfTokenInput.value : '';
+(function() {
+    if (!window.csrfTokenInput) {
+        window.csrfTokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    }
+    const csrfToken = window.csrfTokenInput ? window.csrfTokenInput.value : '';
 
-document.querySelectorAll('.accept-request').forEach(button => {
+    document.querySelectorAll('.accept-request').forEach(button => {
     button.addEventListener('click', async (e) => {
         const requestId = e.target.dataset.requestId;
         try {
@@ -134,7 +135,8 @@ document.querySelectorAll('.decline-request').forEach(button => {
             console.error('Error:', error);
         }
     });
-});
+    });
+})();
 </script>
 {% endblock %}
 {% endblock %}
