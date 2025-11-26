@@ -560,3 +560,22 @@ body {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+/* Avatar Image Fix */
+img.rounded-circle {
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    width: 150px !important;
+    height: 150px !important;
+}
+
+.card img.rounded-circle {
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+}
+
+.rounded-circle img {
+    width: 100% !important;
+    height: 100% !important;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+}

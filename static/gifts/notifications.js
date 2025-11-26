@@ -18,6 +18,7 @@ function initNotificationWebSocket() {
                 try {
                     const data = JSON.parse(event.data);
                     showNotification(data);
+                    addNotificationToMenu(data);
                     updateNotificationBadge();
                 } catch (err) {
                     console.error('Failed to parse notification', err);
@@ -91,22 +92,26 @@ function initNotificationWebSocket() {
             count += 1;
             badge.textContent = count;
             badge.style.display = count > 0 ? 'block' : 'none';
-            
-            // Додати повідомлення в меню сповіщень
-            addNotificationToMenu(data);
         }
     }
     
     function addNotificationToMenu(data) {
-        const dropdown = document.querySelector('.notification-dropdown-menu');
-        if (!dropdown) return;
+        const notifList = document.getElementById('notifications-list');
+        if (!notifList) return;
         
-        const notifItem = document.createElement('li');
-        notifItem.className = 'dropdown-item';
+        // Очистити placeholder якщо це перше повідомлення
+        if (notifList.innerHTML.includes('Немає нових сповіщень')) {
+            notifList.innerHTML = '';
+        }
+        
+        const notifItem = document.createElement('div');
+        notifItem.className = 'dropdown-item border-bottom p-3';
         notifItem.innerHTML = `
-            <div class="small">
-                <strong>${data.from}</strong>
-                <div class="text-muted">${data.message_preview || 'Нове повідомлення'}</div>
+            <div class="d-flex gap-2">
+                <div>
+                    <strong class="d-block">${data.from}</strong>
+                    <small class="text-muted">${data.message_preview || 'Нове повідомлення'}</small>
+                </div>
             </div>
         `;
         notifItem.style.cursor = 'pointer';
@@ -115,7 +120,7 @@ function initNotificationWebSocket() {
                 window.location.href = `/chat/conversation/${data.conversation_id}/`;
             };
         }
-        dropdown.insertBefore(notifItem, dropdown.firstChild);
+        notifList.insertBefore(notifItem, notifList.firstChild);
     }
 
     // Start the connection
