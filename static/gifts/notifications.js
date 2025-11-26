@@ -17,9 +17,22 @@ function initNotificationWebSocket() {
             notificationSocket.onmessage = (event) => {
                 try {
                     const data = JSON.parse(event.data);
-                    showNotification(data);
-                    addNotificationToMenu(data);
-                    updateNotificationBadge();
+                    console.log('📩 Notification WS received:', data);
+                    
+                    // Handle notification messages
+                    if (data.type === 'notification' || data.from) {
+                        showNotification(data);
+                        if (data.from) addNotificationToMenu(data);
+                        updateNotificationBadge();
+                    }
+                    // Handle notification count updates
+                    else if (data.type === 'notification_count') {
+                        const badge = document.getElementById('notification-count');
+                        if (badge && data.count > 0) {
+                            badge.textContent = data.count;
+                            badge.style.display = 'block';
+                        }
+                    }
                 } catch (err) {
                     console.error('Failed to parse notification', err);
                 }
@@ -97,7 +110,7 @@ function initNotificationWebSocket() {
     
     function addNotificationToMenu(data) {
         const notifList = document.getElementById('notifications-list');
-        if (!notifList) return;
+        if (!notifList || !data.from) return;
         
         // Очистити placeholder якщо це перше повідомлення
         if (notifList.innerHTML.includes('Немає нових сповіщень')) {
@@ -106,11 +119,12 @@ function initNotificationWebSocket() {
         
         const notifItem = document.createElement('div');
         notifItem.className = 'dropdown-item border-bottom p-3';
+        const preview = data.message_preview || data.text || 'Нове повідомлення';
         notifItem.innerHTML = `
             <div class="d-flex gap-2">
                 <div>
-                    <strong class="d-block">${data.from}</strong>
-                    <small class="text-muted">${data.message_preview || 'Нове повідомлення'}</small>
+                    <strong class="d-block">${data.from || 'Unknown'}</strong>
+                    <small class="text-muted">${preview}</small>
                 </div>
             </div>
         `;
