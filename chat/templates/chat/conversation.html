@@ -7,24 +7,58 @@
 <link rel="stylesheet" href="https://unpkg.com/@yaireo/tagify/dist/tagify.css" />
 <script src="https://unpkg.com/@yaireo/tagify"></script>
 <link href="https://cdn.jsdelivr.net/npm/emoji-mart@latest/css/emoji-mart.css" rel="stylesheet">
+<style>
+  .min-w-0 { min-width: 0; }
+  .chat-input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .chat-input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .chat-input-field {
+    flex: 1;
+    min-width: 0;
+  }
+  .chat-input-buttons {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .mobile-buttons-row {
+    display: none;
+  }
+  @media (max-width: 576px) {
+    .desktop-only-btn { display: none !important; }
+    .mobile-buttons-row { display: flex; gap: 8px; }
+  }
+</style>
 {% endblock %}
 
 {% block content %}
-<div id="chat-root" class="container py-3">
+<div id="chat-root" class="container py-2 py-sm-3 px-0 px-sm-3">
   <div class="chat-panel">
 
     <!-- Enhanced Chat Header -->
-    <div class="chat-header d-flex align-items-center justify-content-between border-bottom p-3">
-      <div class="d-flex align-items-center">
+    <div class="chat-header d-flex align-items-center justify-content-between border-bottom p-2 p-sm-3">
+      <div class="d-flex align-items-center flex-grow-1 min-w-0">
+        <a href="{% url 'chat:inbox' %}" class="btn btn-link text-dark p-1 me-2 d-md-none" title="Назад">
+          <i class="fas fa-arrow-left"></i>
+        </a>
         {% if other and other.profile.avatar %}
-          <a href="{% url 'gifts:view_profile' other.username %}" class="d-block">
-            <img src="{{ other.profile.avatar.url }}" width="48" height="48" class="rounded-circle me-3 chat-avatar">
+          <a href="{% url 'gifts:view_profile' other.username %}" class="d-block flex-shrink-0">
+            <img src="{{ other.profile.avatar.url }}" width="44" height="44" class="rounded-circle me-2 me-sm-3 chat-avatar">
           </a>
         {% else %}
-          <div class="rounded-circle bg-secondary me-3" style="width:48px;height:48px;"></div>
+          <div class="rounded-circle bg-secondary me-2 me-sm-3 flex-shrink-0 d-flex align-items-center justify-content-center text-white" style="width:44px;height:44px;font-size:1.1rem;">
+            {% if other %}{{ other.username|make_list|first|upper }}{% else %}<i class="fas fa-user"></i>{% endif %}
+          </div>
         {% endif %}
-        <div>
-          <div class="fw-bold">
+        <div class="min-w-0">
+          <div class="fw-bold text-truncate">
             {% if other %}
               <a href="{% url 'gifts:view_profile' other.username %}" class="text-decoration-none text-dark">
                 {{ other.profile.display_name|default:other.username }}
@@ -34,12 +68,12 @@
             {% endif %}
           </div>
           {% if other.profile.location %}
-            <div class="text-muted small"><i class="fas fa-map-marker-alt me-1"></i>{{ other.profile.location }}</div>
+            <div class="text-muted small text-truncate"><i class="fas fa-map-marker-alt me-1"></i>{{ other.profile.location }}</div>
           {% endif %}
         </div>
       </div>
-      <div class="chat-actions">
-        <button class="btn btn-light btn-sm me-2" title="Пошук у повідомленнях">
+      <div class="chat-actions flex-shrink-0 ms-2">
+        <button class="btn btn-light btn-sm me-1 me-sm-2 d-none d-sm-inline-block" title="Пошук у повідомленнях">
           <i class="fas fa-search"></i>
         </button>
         <div class="dropdown d-inline-block">
@@ -49,6 +83,9 @@
           <ul class="dropdown-menu dropdown-menu-end">
             <li><a class="dropdown-item" href="{% url 'gifts:view_profile' other.username %}">
               <i class="fas fa-user me-2"></i>Переглянути профіль
+            </a></li>
+            <li class="d-sm-none"><a class="dropdown-item" href="#">
+              <i class="fas fa-search me-2"></i>Пошук
             </a></li>
             <li><a class="dropdown-item" href="#">
               <i class="fas fa-ban me-2"></i>Заблокувати
@@ -62,7 +99,7 @@
       </div>
     </div>
 
-    <!-- 💬 Повідомлення -->
+    <!-- Messages Area -->
     <div id="messages" class="chat-messages">
       {% for m in chat_messages %}
         <div class="message-wrapper {% if m.sender == request.user %}me{% else %}them{% endif %}" data-message-id="{{ m.id }}">
@@ -85,7 +122,7 @@
                   <img src="{{ m.forwarded_gift.image.url }}" class="gift-thumb" alt="">
                 {% endif %}
                 <div>
-                  <div class="fw-bold">🎁 {{ m.forwarded_gift.title }}</div>
+                  <div class="fw-bold">{{ m.forwarded_gift.title }}</div>
                   <a href="{% url 'gifts:gift_detail' m.forwarded_gift.id %}">Переглянути</a>
                 </div>
               </div>
@@ -97,28 +134,41 @@
       {% endfor %}
     </div>
 
-    <!-- Enhanced Input Area -->
-    <div class="chat-input border-top bg-white p-3">
-      <form id="msg-form" class="d-flex flex-column gap-2" enctype="multipart/form-data">
-        <div id="photo-preview"></div>
-        <div class="input-group">
-          <input type="file" id="photo-input" style="display: none;" accept="image/*">
-          <button type="button" class="btn btn-light" onclick="document.getElementById('photo-input').click();" title="Додати фото">
-            <i class="fas fa-image"></i>
-          </button>
-          <input id="message-input" name="text" class="form-control form-control-lg" 
-                 placeholder="Написати повідомлення..." autocomplete="off">
-          <button type="button" class="btn btn-light" id="emoji-button" title="Додати емодзі">
-            <i class="far fa-smile"></i>
-          </button>
-          <a href="{% url 'chat:forward_saved' conversation.id %}" 
-             class="btn btn-light" title="Поділитися подарунком">
-            <i class="fas fa-gift"></i>
-          </a>
-          <button class="btn btn-primary px-4" type="submit">
-            <i class="fas fa-paper-plane me-1"></i>
-            Надіслати
-          </button>
+    <!-- Mobile-Optimized Input Area -->
+    <div class="chat-input border-top bg-white p-2 p-sm-3">
+      <form id="msg-form" enctype="multipart/form-data">
+        <div class="chat-input-wrapper">
+          <div id="photo-preview"></div>
+          <div class="chat-input-row">
+            <input type="file" id="photo-input" style="display: none;" accept="image/*">
+            <button type="button" class="btn btn-light" onclick="document.getElementById('photo-input').click();" title="Додати фото">
+              <i class="fas fa-image"></i>
+            </button>
+            <input id="message-input" name="text" class="form-control chat-input-field" 
+                   placeholder="Повідомлення..." autocomplete="off">
+            <div class="chat-input-buttons">
+              <button type="button" class="btn btn-light desktop-only-btn" id="emoji-button" title="Додати емодзі">
+                <i class="far fa-smile"></i>
+              </button>
+              <a href="{% url 'chat:forward_saved' conversation.id %}" 
+                 class="btn btn-light desktop-only-btn" title="Поділитися подарунком">
+                <i class="fas fa-gift"></i>
+              </a>
+              <button class="btn btn-primary" type="submit" title="Надіслати">
+                <i class="fas fa-paper-plane"></i>
+                <span class="d-none d-md-inline ms-1">Надіслати</span>
+              </button>
+            </div>
+          </div>
+          <div class="mobile-buttons-row">
+            <button type="button" class="btn btn-outline-secondary btn-sm flex-fill" id="emoji-button-mobile" title="Емодзі">
+              <i class="far fa-smile me-1"></i>Емодзі
+            </button>
+            <a href="{% url 'chat:forward_saved' conversation.id %}" 
+               class="btn btn-outline-secondary btn-sm flex-fill" title="Подарунок">
+              <i class="fas fa-gift me-1"></i>Подарунок
+            </a>
+          </div>
         </div>
       </form>
     </div>
@@ -135,4 +185,21 @@
   const CURRENT_USERNAME = "{{ request.user.username|escapejs }}";
 </script>
 <script src="{% static 'chat/chat.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const emojiBtn = document.getElementById('emoji-button');
+  const emojiBtnMobile = document.getElementById('emoji-button-mobile');
+  
+  function handleEmojiClick(e) {
+    e.preventDefault();
+    const input = document.getElementById('message-input');
+    if (input) {
+      input.focus();
+    }
+  }
+  
+  if (emojiBtn) emojiBtn.addEventListener('click', handleEmojiClick);
+  if (emojiBtnMobile) emojiBtnMobile.addEventListener('click', handleEmojiClick);
+});
+</script>
 {% endblock %}

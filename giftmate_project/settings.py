@@ -178,7 +178,7 @@ if replit_dev_domain:
     ALLOWED_HOSTS.append('*.replit.dev')
 
 # CSRF Configuration for Replit
-if not hasattr(globals(), 'CSRF_TRUSTED_ORIGINS'):
+if 'CSRF_TRUSTED_ORIGINS' not in dir():
     CSRF_TRUSTED_ORIGINS = []
 if replit_dev_domain:
     CSRF_TRUSTED_ORIGINS.append(f'https://{replit_dev_domain}')

@@ -1,49 +1,214 @@
 {% extends 'gifts/base.html' %}
+{% load static %}
 
 {% block title %}Повідомлення{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'chat/style.css' %}">
+<style>
+  .inbox-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .conversation-list {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    overflow: hidden;
+  }
+  
+  .conversation-item {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid #f1f3f5;
+    transition: background 0.2s;
+  }
+  
+  .conversation-item:hover {
+    background: #f8f9fa;
+  }
+  
+  .conversation-item:last-child {
+    border-bottom: none;
+  }
+  
+  .conversation-avatar {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+  
+  .conversation-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .conversation-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  
+  .conversation-info {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .conversation-name {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .conversation-preview {
+    font-size: 0.875rem;
+    color: #6c757d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .conversation-time {
+    font-size: 0.75rem;
+    color: #adb5bd;
+    flex-shrink: 0;
+    text-align: right;
+  }
+  
+  .inbox-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #e9ecef;
+    background: #fff;
+    border-radius: 12px 12px 0 0;
+  }
+  
+  .inbox-title {
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin: 0;
+  }
+  
+  .empty-inbox {
+    text-align: center;
+    padding: 48px 24px;
+    color: #6c757d;
+  }
+  
+  .empty-inbox i {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+  
+  @media (max-width: 576px) {
+    .conversation-item {
+      padding: 12px;
+    }
+    
+    .conversation-avatar {
+      width: 46px;
+      height: 46px;
+    }
+    
+    .conversation-avatar-placeholder {
+      font-size: 1.1rem;
+    }
+    
+    .conversation-name {
+      font-size: 0.95rem;
+    }
+    
+    .conversation-preview {
+      font-size: 0.8rem;
+    }
+    
+    .inbox-header {
+      padding: 12px;
+    }
+    
+    .inbox-title {
+      font-size: 1.1rem;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-  <div class="chat-wrapper">
-    <div class="chat-list">
-      <div class="p-3 d-flex justify-content-between align-items-center">
-        <strong>Повідомлення</strong>
-        <a class="btn btn-sm btn-outline-primary" href="{% url 'chat:new' %}">Нова</a>
-      </div>
-      {% if conversations %}
-        {% for item in conversations %}
-          {% with c=item.conv other=item.other %}
-          <a class="conv" href="{% url 'chat:conversation' c.id %}">
-            <div class="avatar">
-              {% if other and other.profile.avatar %}
-                <img src="{{ other.profile.avatar.url }}" width="48" height="48">
+<div class="inbox-container">
+  <div class="conversation-list">
+    <div class="inbox-header">
+      <h1 class="inbox-title">
+        <i class="fas fa-comments me-2 text-primary"></i>Повідомлення
+      </h1>
+      <a class="btn btn-primary btn-sm" href="{% url 'chat:new' %}">
+        <i class="fas fa-plus me-1"></i>
+        <span class="d-none d-sm-inline">Нова розмова</span>
+        <span class="d-sm-none">Нова</span>
+      </a>
+    </div>
+    
+    {% if conversations %}
+      {% for item in conversations %}
+        {% with c=item.conv other=item.other %}
+        <a class="conversation-item" href="{% url 'chat:conversation' c.id %}">
+          <div class="conversation-avatar">
+            {% if other and other.profile.avatar %}
+              <img src="{{ other.profile.avatar.url }}" alt="{{ other.username }}">
+            {% else %}
+              <div class="conversation-avatar-placeholder">
+                {% if other %}{{ other.username|make_list|first|upper }}{% else %}<i class="fas fa-user"></i>{% endif %}
+              </div>
+            {% endif %}
+          </div>
+          <div class="conversation-info">
+            <div class="conversation-name">
+              {% if other %}{{ other.profile.display_name|default:other.username }}{% else %}Розмова {{ c.id }}{% endif %}
+            </div>
+            <div class="conversation-preview">
+              {% if c.last_message %}
+                {{ c.last_message.text|truncatechars:40 }}
+              {% else %}
+                Почніть розмову...
               {% endif %}
             </div>
-            <div class="meta">
-              <div class="who">{% if other %}{{ other.profile.display_name|default:other.username }}{% else %}Розмова {{ c.id }}{% endif %}</div>
-              <div class="last">Останнє: {{ c.created_at|date:'j M Y, H:i' }}</div>
-            </div>
-          </a>
-          {% endwith %}
-
-
-        {% endfor %}
-      {% else %}
-        <div class="p-3 text-muted">Немає розмов. Створіть нову.</div>
-      {% endif %}
-    </div>
-    <div class="chat-main">
-      <div class="chat-header">
-        <div><strong>Виберіть розмову</strong></div>
+          </div>
+          <div class="conversation-time">
+            {{ c.created_at|date:'j M' }}<br>
+            <small>{{ c.created_at|date:'H:i' }}</small>
+          </div>
+        </a>
+        {% endwith %}
+      {% endfor %}
+    {% else %}
+      <div class="empty-inbox">
+        <i class="far fa-comments"></i>
+        <h5>Немає розмов</h5>
+        <p class="mb-3">Почніть спілкуватися з друзями!</p>
+        <a href="{% url 'chat:new' %}" class="btn btn-primary">
+          <i class="fas fa-plus me-2"></i>Нова розмова
+        </a>
       </div>
-      <div class="chat-messages" id="messages">
-        <div class="text-muted p-3">Оберіть розмову ліворуч або створіть нову.</div>
-      </div>
-      <div class="chat-input">
-        <div class="input-group">
-          <input class="form-control" placeholder="Напишіть повідомлення..." disabled>
-          <button class="btn btn-primary" disabled>Відправити</button>
-        </div>
-      </div>
-    </div>
+    {% endif %}
   </div>
+</div>
 {% endblock %}
