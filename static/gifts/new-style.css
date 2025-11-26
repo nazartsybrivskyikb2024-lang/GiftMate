@@ -560,13 +560,6 @@ body {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
-/* Avatar Image Fix */
-img.rounded-circle {
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    width: 150px !important;
-    height: 150px !important;
-}
 
 .card img.rounded-circle {
     aspect-ratio: 1 / 1;
@@ -578,4 +571,39 @@ img.rounded-circle {
     height: 100% !important;
     aspect-ratio: 1 / 1;
     object-fit: cover;
+}
+
+/* Avatar Profile Picture Fix */
+.text-center img.rounded-circle {
+    display: block !important;
+    width: 150px !important;
+    height: 150px !important;
+    aspect-ratio: 1 / 1 !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* Profile Container Avatar */
+.card-body .text-center .rounded-circle {
+    width: 150px !important;
+    height: 150px !important;
+    aspect-ratio: 1 / 1 !important;
+    flex-shrink: 0 !important;
+}
+
+.card-body .text-center .rounded-circle img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    aspect-ratio: 1 / 1 !important;
+    object-fit: cover !important;
+}
+
+/* Generic rounded circle images */
+img.rounded-circle {
+    display: block !important;
+    aspect-ratio: 1 / 1 !important;
+    object-fit: cover !important;
 }
