@@ -74,8 +74,10 @@
 {% block extra_js %}
 {% if not is_friend and not has_pending %}
 <script>
-const csrfTokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
-const csrfToken = csrfTokenInput ? csrfTokenInput.value : '';
+if (!window.csrfTokenInput) {
+    window.csrfTokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+}
+const csrfToken = window.csrfTokenInput ? window.csrfTokenInput.value : '';
 const sendFriendButton = document.querySelector('.send-friend-request');
 
 if (sendFriendButton) {

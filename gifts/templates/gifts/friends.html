@@ -90,8 +90,10 @@
 
 {% block extra_js %}
 <script>
-const csrfTokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
-const csrfToken = csrfTokenInput ? csrfTokenInput.value : '';
+if (!window.csrfTokenInput) {
+    window.csrfTokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+}
+const csrfToken = window.csrfTokenInput ? window.csrfTokenInput.value : '';
 
 document.querySelectorAll('.accept-request').forEach(button => {
     button.addEventListener('click', async (e) => {
