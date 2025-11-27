@@ -601,24 +601,41 @@ body {
     object-fit: cover !important;
 }
 
-/* Generic rounded circle images */
+/* UNIVERSAL Avatar Fix - Applied to ALL .rounded-circle img elements */
 img.rounded-circle {
     display: block !important;
-    width: 150px !important;
-    height: 150px !important;
+    width: 140px !important;
+    height: 140px !important;
+    min-width: 140px !important;
+    min-height: 140px !important;
     aspect-ratio: 1 / 1 !important;
     object-fit: cover !important;
     border-radius: 50% !important;
+    flex-shrink: 0 !important;
 }
 
-/* Card image avatars in social/user cards */
-.card img.rounded-circle,
-.user-card img.rounded-circle {
+/* Recommended friends avatars - SMALLER SIZE */
+.suggested-friend-card img.rounded-circle,
+.friend-avatar-wrap img.rounded-circle {
     width: 120px !important;
     height: 120px !important;
-    display: block !important;
-    margin: 0 auto !important;
-    aspect-ratio: 1 / 1 !important;
-    object-fit: cover !important;
-    border-radius: 50% !important;
+    min-width: 120px !important;
+    min-height: 120px !important;
+}
+
+/* Profile page avatars - LARGER SIZE */
+.text-center img.rounded-circle,
+.card-body .text-center img.rounded-circle {
+    width: 150px !important;
+    height: 150px !important;
+    min-width: 150px !important;
+    min-height: 150px !important;
+}
+
+/* All card image avatars */
+.card img.rounded-circle {
+    width: 120px !important;
+    height: 120px !important;
+    min-width: 120px !important;
+    min-height: 120px !important;
 }
