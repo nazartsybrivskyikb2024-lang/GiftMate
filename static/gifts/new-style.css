@@ -604,6 +604,21 @@ body {
 /* Generic rounded circle images */
 img.rounded-circle {
     display: block !important;
+    width: 150px !important;
+    height: 150px !important;
     aspect-ratio: 1 / 1 !important;
     object-fit: cover !important;
+    border-radius: 50% !important;
+}
+
+/* Card image avatars in social/user cards */
+.card img.rounded-circle,
+.user-card img.rounded-circle {
+    width: 120px !important;
+    height: 120px !important;
+    display: block !important;
+    margin: 0 auto !important;
+    aspect-ratio: 1 / 1 !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
 }
