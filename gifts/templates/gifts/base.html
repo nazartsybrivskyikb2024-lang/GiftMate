@@ -15,164 +15,189 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'gifts/new-style.css' %}">
     <style>
-    .navbar {
-        padding: 1rem 0;
-        background: rgba(255, 255, 255, 0.95) !important;
-        backdrop-filter: blur(10px);
-    }
-    
-    .navbar-brand {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--primary);
-        transition: all 0.3s ease;
-    }
-    
-    .navbar-brand:hover {
-        transform: scale(1.05);
-        color: var(--primary-dark);
-    }
-    
-    .nav-link {
-        font-weight: 500;
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        transition: all 0.3s ease;
-    }
-    
-    .nav-link:hover {
-        background: var(--primary-light);
-        color: var(--primary);
-    }
-    
-    .navbar-search {
-        max-width: 600px;
-        width: 100%;
-    }
-    
-    .navbar-search .input-group {
-        border-radius: 2rem;
-        overflow: hidden;
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
-    }
-    
-    .navbar-search .form-select {
-        border: none;
-        background-color: #f8f9fa;
-        padding-left: 1rem;
-    }
-    
-    .navbar-search .form-control {
-        border: none;
-        padding-left: 1rem;
-    }
-    
-    .navbar-search .btn {
-        padding: 0.5rem 1.5rem;
-        border-radius: 0;
-    }
-    
-    .profile-dropdown .avatar {
-        width: 36px;
-        height: 36px;
-        object-fit: cover;
-    }
-    
-    .notification-badge {
-        position: absolute;
-        top: 0;
-        right: 0;
-        transform: translate(25%, -25%);
-    }
-    
-    .navbar-nav .dropdown-menu {
-        border: none;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        border-radius: 1rem;
-        padding: 0.5rem;
-    }
-    
-    .dropdown-item {
-        padding: 0.75rem 1.5rem;
-        font-weight: 500;
-        transition: all 0.2s ease;
-        border-radius: 0.5rem;
-    }
-    
-    .dropdown-item:hover {
-        background-color: var(--primary-light);
-        color: var(--primary);
-    }
-    
-    .nav-icon {
-        width: 20px;
-        text-align: center;
-        margin-right: 0.5rem;
-        color: var(--primary);
-    }
+        /* =========================================
+           1. BASIC UI STYLES
+           ========================================= */
+        .navbar {
+            padding: 0.75rem 0;
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
 
-    .auth-buttons .nav-link {
-        border: 2px solid transparent;
-    }
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
 
-    .auth-buttons .nav-link:hover {
-        border-color: var(--primary);
-    }
+        .nav-link {
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
 
-    .auth-buttons .nav-link.btn-primary {
-        border-color: var(--primary);
-    }
+        .nav-link:hover {
+            background: rgba(var(--bs-primary-rgb), 0.1);
+            color: var(--primary);
+        }
 
-    .auth-buttons .nav-link.btn-primary:hover {
-        background-color: var(--primary-dark);
-        border-color: var(--primary-dark);
-    }
+        /* =========================================
+           2. AVATAR FIXES (NUCLEAR METHOD)
+           ========================================= */
 
-    
-    .profile-dropdown .avatar {
-        width: 36px;
-        height: 36px;
-        max-width: 36px;
-        max-height: 36px;
-        object-fit: cover;
-        border-radius: 50%;
-        flex-shrink: 0;
-    }
-    
-    .navbar .rounded-circle.bg-secondary {
-        width: 36px !important;
-        height: 36px !important;
-        min-width: 36px !important;
-        min-height: 36px !important;
-        flex-shrink: 0;
-    }
-    
-    .navbar .rounded-circle.bg-secondary img {
-        width: 100% !important;
-        height: 100% !important;
-        max-width: 36px !important;
-        max-height: 36px !important;
-        object-fit: cover;
-    }
-    @media (max-width: 991.98px) {
+        /* Global rule: all rounded images must be squares */
+        img.rounded-circle, .avatar {
+            object-fit: cover !important;
+            aspect-ratio: 1 / 1 !important;
+        }
+
+      /* --- MENU AVATARS (NAVBAR) --- */
+      /* Виправляємо сплюснутого хом'яка в меню */
+      .navbar nav img,
+      .navbar .nav-item img,
+      .navbar .dropdown-toggle img,
+      .navbar .avatar {
+          width: 36px !important;
+          height: 36px !important;
+          min-width: 36px !important;   /* 1. Забороняє зменшення */
+          max-width: 36px !important;
+          border-radius: 50% !important;
+          padding: 0 !important;
+          margin-right: 8px;
+          object-fit: cover !important; /* 2. Обрізає фото, а не розтягує */
+          flex-shrink: 0 !important;    /* 3. Головне: забороняє сплющування */
+      }
+
+      /* --- CARD AVATARS (RECOMMENDED FRIENDS) --- */
+      /* Виправляємо велетенські аватарки в рекомендаціях */
+      .card-body img.rounded-circle {
+          width: 80px !important;       
+          height: 80px !important;      
+          min-width: 80px !important;   /* Гарантує розмір */
+          max-width: 80px !important;
+          margin: 0 auto 1rem auto;     
+          display: block;
+          object-fit: cover !important; 
+      }
+
+        /* Placeholder letters in menu */
+        .navbar .rounded-circle.bg-primary,
+        .navbar .rounded-circle.bg-secondary {
+            width: 36px !important;
+            height: 36px !important;
+            min-width: 36px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            margin-right: 8px;
+        }
+
+        /* --- CARD AVATARS (RECOMMENDED FRIENDS) --- */
+        /* This fixes the huge images in "Recommended Friends" */
+        .card-body img.rounded-circle {
+            width: 80px !important;       /* FORCE 80px width */
+            height: 80px !important;      /* FORCE 80px height */
+            max-width: 80px !important;
+            margin: 0 auto 1rem auto;     /* Center it */
+            display: block;
+        }
+
+        /* --- LIST AVATARS (SMALL LISTS) --- */
+        .list-group-item img,
+        .suggested-friend-item img {
+            width: 48px !important;
+            height: 48px !important;
+        }
+
+        /* --- PROFILE HEADER AVATAR (LARGE) --- */
+        /* Only in the main profile view do we allow big avatars */
+        .profile-header img, 
+        .text-center img[width="150"] {
+            width: 150px !important;
+            height: 150px !important;
+            max-width: 150px !important;
+        }
+
+        /* =========================================
+           3. SEARCH AND FORM ELEMENTS
+           ========================================= */
         .navbar-search {
-            margin: 1rem 0;
-        }
-        
-        .navbar-collapse {
-            background: white;
-            padding: 1rem;
-            border-radius: 1rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            margin-top: 1rem;
+            max-width: 600px;
+            width: 100%;
         }
 
-        .auth-buttons {
-            margin-top: 1rem;
-            display: grid;
-            gap: 0.5rem;
+        .navbar-search .input-group {
+            border-radius: 2rem;
+            overflow: hidden;
+            border: 1px solid #eee;
         }
-    }
+
+        .navbar-search .form-select,
+        .navbar-search .form-control {
+            border: none;
+            box-shadow: none;
+        }
+
+        .navbar-search .btn {
+            padding: 0.5rem 1.5rem;
+        }
+
+        /* =========================================
+           4. DROPDOWNS AND NOTIFICATIONS
+           ========================================= */
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 1rem;
+            padding: 0.5rem;
+        }
+
+        .dropdown-item {
+            border-radius: 0.5rem;
+            padding: 0.7rem 1rem;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 2px;
+            right: 5px;
+            font-size: 0.65rem;
+            transform: translate(0, 0);
+        }
+
+        #notifications-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        #notifications-list::-webkit-scrollbar-thumb {
+            background-color: #ccc;
+            border-radius: 3px;
+        }
+
+        /* =========================================
+           5. RESPONSIVENESS
+           ========================================= */
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                background: white;
+                padding: 1rem;
+                border-radius: 1rem;
+                margin-top: 10px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            }
+
+            .navbar-search {
+                margin: 1rem 0;
+            }
+
+            .auth-buttons {
+                display: grid;
+                gap: 10px;
+                margin-top: 10px;
+            }
+        }
     </style>
     {% block extra_css %}{% endblock %}
   </head>
@@ -199,9 +224,9 @@
           <!-- Global Search -->
           <form class="navbar-search mx-lg-4" method="get" action="{% url 'gifts:catalog' %}">
             <div class="input-group">
-              <select name="type" class="form-select border-0">
+                <select name="type" class="form-select border-0" style="background-image: none; cursor: default;">
                 <option value="gifts">🎁 Подарунки</option>
-                <option value="users">👥 Користувачі</option>
+                <!-- <option value="users">👥 Користувачі</option> -->
               </select>
               <input name="q" class="form-control border-0" type="search" 
                      placeholder="Пошук подарунків та друзів..." aria-label="Search">
@@ -214,10 +239,10 @@
           <!-- Main Navigation -->
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" 
+              <!-- <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" 
                  href="{% url 'gifts:home' %}">
                 <i class="fas fa-home nav-icon"></i>Головна
-              </a>
+              </a> -->
             </li>
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle {% if request.resolver_match.url_name == 'catalog' %}active{% endif %}" 
@@ -263,7 +288,7 @@
           <ul class="navbar-nav ms-auto {% if not user.is_authenticated %}auth-buttons{% endif %}">
             {% if user.is_authenticated %}
             <li class="nav-item me-3 position-relative">
-              <a class="nav-link p-2" href="#" id="notifications-toggle" data-bs-toggle="dropdown">
+              <a class="nav-link p-2" href="#" id="notifications-toggle" data-bs-toggle="dropdown" onclick="markNotificationsRead()">
                 <i class="fas fa-bell"></i>
                 <span id="notification-count" class="notification-badge badge rounded-pill bg-danger" style="display: none;">0</span>
               </a>
@@ -282,10 +307,12 @@
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown">
                 {% if user.profile.avatar %}
-                  <img src="{{ user.profile.avatar.url }}" class="avatar rounded-circle me-2" 
-                       alt="{{ user.username }}">
+                <div class="navbar-avatar me-2">
+                  <img src="{{ user.profile.avatar.url }}" class="avatar-img" alt="{{ user.username }}">
+                </div>
                 {% else %}
-                  <div class="avatar rounded-circle bg-primary text-white me-2 d-flex align-items-center justify-content-center">
+                    <div class="navbar-avatar bg-primary text-white d-flex align-items-center justify-content-center me-2">
+
                     {{ user.username|make_list|first|upper }}
                   </div>
                 {% endif %}
@@ -502,7 +529,36 @@
         toast.remove()
       })
     }
+      // Функція для очищення сповіщень при кліку
+      function markNotificationsRead() {
+          // 1. Миттєво ховаємо червоний кружечок
+          const badge = document.getElementById('notification-count');
+          if (badge) {
+              badge.style.display = 'none';
+              badge.innerText = '0';
+          }
 
+          // Також ховаємо бейдж "quick-unread" якщо він є
+          const quickBadge = document.getElementById('quick-unread');
+          if (quickBadge) {
+               quickBadge.style.display = 'none';
+          }
+
+          // 2. Беремо CSRF токен з вашої прихованої форми
+          const csrfInput = document.querySelector('#csrf-token-form input');
+          const csrfToken = csrfInput ? csrfInput.value : '';
+
+          // 3. Відправляємо запит на сервер
+          fetch('/chat/notifications/mark-read/', {
+              method: 'POST',
+              headers: {
+                  'X-CSRFToken': csrfToken,
+                  'Content-Type': 'application/json'
+              }
+          }).then(response => {
+              if (!response.ok) console.error('Помилка при оновленні сповіщень');
+          });
+      }
     // Handle active menu items
     document.addEventListener('DOMContentLoaded', function() {
         // Get current URL path

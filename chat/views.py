@@ -178,3 +178,10 @@ def get_messages(request, conv_id):
             }
         data.append(item)
     return JsonResponse({'messages': data})
+@login_required
+@require_http_methods(['POST'])
+def mark_notifications_read(request):
+    """Позначає всі сповіщення користувача як прочитані"""
+    # Використовуємо related_name='notifications' з моделі User
+    request.user.notifications.filter(is_read=False).update(is_read=True)
+    return JsonResponse({'status': 'ok'})

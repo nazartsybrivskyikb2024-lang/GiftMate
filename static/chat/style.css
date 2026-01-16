@@ -744,3 +744,129 @@
     border-color: #404040;
   }
 }
+/* =========================
+   CHAT VISUAL CLARITY FIX
+   ========================= */
+
+/* Chat background */
+.chat-container {
+    background: #0f1115;
+    border-radius: 16px;
+    padding: 16px;
+}
+
+/* Messages area */
+.chat-messages {
+    background: #161a22;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+/* Base message bubble */
+.message-bubble {
+    color: #ffffff;
+    padding: 12px 16px;
+    border-radius: 16px;
+    max-width: 70%;
+    line-height: 1.5;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+/* My messages */
+.message-bubble.sent {
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    margin-left: auto;
+    border-bottom-right-radius: 6px;
+}
+
+/* Other messages */
+.message-bubble.received {
+    background: #1f2430;
+    margin-right: auto;
+    border-bottom-left-radius: 6px;
+}
+
+/* Time / meta text */
+.message-meta,
+.message-time {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-top: 4px;
+}
+
+/* Chat header */
+.chat-header {
+    background: #161a22;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 12px 16px;
+    color: #ffffff;
+}
+
+/* Input area */
+.chat-input {
+    background: #1a1f2b;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 12px;
+    display: flex;
+    gap: 10px;
+}
+
+/* Input field */
+.chat-input input,
+.chat-input textarea {
+    background: #0f1115;
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #ffffff;
+    border-radius: 999px;
+    padding: 10px 14px;
+}
+
+/* Send button */
+.chat-input button {
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    border: none;
+    color: white;
+    border-radius: 999px;
+    padding: 10px 18px;
+}
+
+/* Placeholder */
+.chat-input input::placeholder {
+    color: #9ca3af;
+}
+/* =========================
+   CHAT READABILITY FIX
+   ========================= */
+
+/* Username inside message */
+.message-bubble .username,
+.message-author {
+    color: #e5e7eb;              /* світло-сірий */
+    font-weight: 600;
+    background: none !important;
+}
+
+/* Time label */
+.message-time {
+    color: #9ca3af;              /* muted */
+    background: none !important;
+}
+
+/* System / action messages */
+.message-system,
+.message-bubble.system {
+    background: #1f2937;         /* темно-сірий */
+    color: #e5e7eb;
+    border-left: 3px solid #6366f1;
+}
+
+/* Links inside messages */
+.message-bubble a {
+    color: #a5b4fc;              /* світліше синього */
+    text-decoration: underline;
+}
+
+.message-bubble a:hover {
+    color: #c7d2fe;
+}

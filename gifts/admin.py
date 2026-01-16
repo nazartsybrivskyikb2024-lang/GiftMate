@@ -11,7 +11,7 @@ class CategoryAdmin(admin.ModelAdmin):
 class GiftAdmin(admin.ModelAdmin):
     list_display = ('title', 'category', 'created_at')
     list_filter = ('category',)
-
+    fields = ('title', 'description', 'price', 'category', 'image', 'link', 'is_available')
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):

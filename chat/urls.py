@@ -10,4 +10,5 @@ urlpatterns = [
     path('conversation/<int:conv_id>/send/', views.send_message, name='send_message'),
     path('conversation/<int:conv_id>/messages/', views.get_messages, name='get_messages'),
     path('forward/<int:conv_id>/', views.forward_saved, name='forward_saved'),
+    path('notifications/mark-read/', views.mark_notifications_read, name='mark_notifications_read'),
 ]

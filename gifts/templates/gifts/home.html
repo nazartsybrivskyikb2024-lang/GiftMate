@@ -16,11 +16,12 @@
         <div class="suggested-friend-card text-center">
           <div class="friend-avatar-wrap mb-2">
             {% if friend.profile.avatar %}
-              <img src="{{ friend.profile.avatar.url }}" alt="{{ friend.username }}" 
-                   class="rounded-circle border border-2 border-white shadow-sm">
+              <img src="{{ friend.profile.avatar.url }}"
+                   alt="{{ friend.username }}"
+                   class="avatar-img">
             {% else %}
-              <div class="default-avatar rounded-circle border border-2 border-white shadow-sm 
-                          d-flex align-items-center justify-content-center bg-light">
+            <div class="friend-avatar-wrap d-flex align-items-center justify-content-center bg-light">
+
                 <i class="fas fa-user text-muted"></i>
               </div>
             {% endif %}

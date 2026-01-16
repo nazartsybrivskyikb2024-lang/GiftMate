@@ -10,13 +10,13 @@ class Conversation(models.Model):
     def __str__(self):
         return f"Conversation {self.id}"
 
-
 class Message(models.Model):
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     text = models.TextField(blank=True)
     photo = models.ImageField(upload_to='chat_photos/', null=True, blank=True)
     # Optional reference to a forwarded gift
+    
     forwarded_gift = models.ForeignKey(
         'gifts.Gift', on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
     created_at = models.DateTimeField(auto_now_add=True)

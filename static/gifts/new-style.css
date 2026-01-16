@@ -561,17 +561,8 @@ body {
   100% { background-position: -200% 0; }
 }
 
-.card img.rounded-circle {
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-}
 
-.rounded-circle img {
-    width: 100% !important;
-    height: 100% !important;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-}
+
 
 /* Avatar Profile Picture Fix */
 .text-center img.rounded-circle {
@@ -600,42 +591,55 @@ body {
     aspect-ratio: 1 / 1 !important;
     object-fit: cover !important;
 }
+/* =========================
+   AVATAR SYSTEM (CLEAN)
+   ========================= */
 
-/* UNIVERSAL Avatar Fix - Applied to ALL .rounded-circle img elements */
-img.rounded-circle {
-    display: block !important;
-    width: 140px !important;
-    height: 140px !important;
-    min-width: 140px !important;
-    min-height: 140px !important;
-    aspect-ratio: 1 / 1 !important;
-    object-fit: cover !important;
-    border-radius: 50% !important;
-    flex-shrink: 0 !important;
+/* 1. БАЗОВЕ ПРАВИЛО — ЖОДНИХ РОЗМІРІВ */
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
 }
 
-/* Recommended friends avatars - SMALLER SIZE */
-.suggested-friend-card img.rounded-circle,
-.friend-avatar-wrap img.rounded-circle {
-    width: 120px !important;
-    height: 120px !important;
-    min-width: 120px !important;
-    min-height: 120px !important;
+/* 2. РЕКОМЕНДОВАНІ ДРУЗІ */
+.friend-avatar-wrap {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin: 0 auto;
 }
 
-/* Profile page avatars - LARGER SIZE */
-.text-center img.rounded-circle,
-.card-body .text-center img.rounded-circle {
-    width: 150px !important;
-    height: 150px !important;
-    min-width: 150px !important;
-    min-height: 150px !important;
+/* 3. NAVBAR */
+.navbar-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    overflow: hidden;
 }
 
-/* All card image avatars */
-.card img.rounded-circle {
-    width: 120px !important;
-    height: 120px !important;
-    min-width: 120px !important;
-    min-height: 120px !important;
+/* 4. СПИСКИ (friends, find_users) */
+.list-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
 }
+
+/* 5. ПРОФІЛЬ */
+.profile-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+
+
+
+
+
+

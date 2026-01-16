@@ -140,7 +140,6 @@
 
                 {% if user.is_authenticated and not hide_sidebar %}
                 <div class="col-lg-4">
-                    <!-- Quick Actions & Friend Suggestions -->
                     <div class="card shadow-sm rounded-4 mb-4">
                         <div class="card-body p-4">
                             <div class="d-flex align-items-center mb-3">
@@ -155,7 +154,6 @@
                             <div class="suggested-friends-list">
                                 {% for friend in suggested_friends %}
                                 <div class="suggested-friend-item d-flex align-items-center p-2 rounded-3 mb-2 hover-action">
-                                    <!-- User Avatar -->
                                     <div class="flex-shrink-0">
                                         {% if friend.profile.avatar %}
                                         <div class="avatar-circle">
@@ -170,7 +168,6 @@
                                         {% endif %}
                                     </div>
 
-                                    <!-- User Info -->
                                     <div class="flex-grow-1 ms-3">
                                         <div class="fw-medium">{{ friend.profile.display_name|default:friend.username }}</div>
                                         {% if friend.profile.location %}
@@ -180,7 +177,6 @@
                                         {% endif %}
                                     </div>
 
-                                    <!-- Action Button -->
                                     <a href="{% url 'gifts:view_profile' friend.id %}"
                                        class="btn btn-sm btn-primary ms-2 rounded-pill">
                                         <i class="fas fa-user-plus"></i>
@@ -197,7 +193,6 @@
                         </div>
                     </div>
 
-                    <!-- Profile Stats -->
                     <div class="card shadow-sm rounded-4">
                         <div class="card-body p-4">
                             <div class="d-flex align-items-center">

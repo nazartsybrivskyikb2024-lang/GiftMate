@@ -24,7 +24,11 @@ class Gift(models.Model):
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+    link = models.URLField(
+        max_length=500, 
+        blank=True, 
+        null=True, 
+        verbose_name="Посилання на подарунок")
     class Meta:
         ordering = ['-created_at']
         

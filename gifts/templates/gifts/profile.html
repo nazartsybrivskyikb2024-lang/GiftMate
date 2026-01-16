@@ -11,12 +11,15 @@
                 <div class="card-body">
                     <div class="text-center mb-4">
                         {% if profile and profile.avatar %}
-                            <img src="{{ profile.avatar.url }}" class="rounded-circle mb-3" width="150" height="150" alt="{{ profile.display_name }}">
+                            <div class="profile-avatar mx-auto mb-3">
+                                <img src="{{ profile.avatar.url }}" class="avatar-img" alt="{{ profile.display_name }}">
+                            </div>
                         {% else %}
-                            <div class="rounded-circle bg-secondary mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
-                                <i class="fas fa-user fa-4x text-white"></i>
+                            <div class="profile-avatar mx-auto mb-3 bg-secondary d-flex align-items-center justify-content-center">
+                                <i class="fas fa-user fa-3x text-white"></i>
                             </div>
                         {% endif %}
+
                         
                         <h2 class="mb-0">{{ profile.display_name|default:user.username }}</h2>
                         <p class="text-muted">@{{ user.username }}</p>
@@ -51,9 +54,7 @@
                                         <p class="card-text small">{{ item.gift.description|truncatewords:20 }}</p>
                                         <div class="d-flex justify-content-between align-items-center">
                                             <a href="{% url 'gifts:gift_detail' item.gift.id %}" class="btn btn-sm btn-outline-primary">Детальніше</a>
-                                            <button class="btn btn-sm btn-outline-primary share-gift" data-gift-id="{{ item.gift.id }}">
-                                                <i class="fas fa-share"></i>
-                                            </button>
+                                        
                                         </div>
                                     </div>
                                 </div>

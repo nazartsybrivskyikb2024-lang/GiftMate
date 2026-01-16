@@ -185,12 +185,15 @@
               {% if other %}{{ other.profile.display_name|default:other.username }}{% else %}Розмова {{ c.id }}{% endif %}
             </div>
             <div class="conversation-preview">
-              {% if c.last_message %}
-                {{ c.last_message.text|truncatechars:40 }}
-              {% else %}
-                Почніть розмову...
-              {% endif %}
+              {% with last=c.messages.last %}
+                {% if last %}
+                  {{ last.text|truncatechars:40 }}
+                {% else %}
+                  Почніть розмову…
+                {% endif %}
+              {% endwith %}
             </div>
+
           </div>
           <div class="conversation-time">
             {{ c.created_at|date:'j M' }}<br>
