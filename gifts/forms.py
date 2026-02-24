@@ -74,3 +74,48 @@ class ProfileForm(forms.ModelForm):
             if avatar.size > 5 * 1024 * 1024:
                 raise ValidationError('Розмір файлу не повинен перевищувати 5MB')
         return avatar
+
+
+class StoryForm(forms.ModelForm):
+    """Форма для створення Stories"""
+    class Meta:
+        from .models import Story
+        model = Story
+        fields = ('image', 'title', 'description', 'gift', 'background_color')
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Заголовок для вашої історії',
+                'maxlength': '200'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Додайте описання (опціонально)',
+                'rows': 3,
+                'maxlength': '500'
+            }),
+            'image': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*',
+                'required': 'required'
+            }),
+            'gift': forms.Select(attrs={
+                'class': 'form-control',
+            }),
+            'background_color': forms.TextInput(attrs={
+                'class': 'form-control',
+                'type': 'color',
+                'value': '#6366f1'
+            }),
+        }
+    
+    def clean_image(self):
+        image = self.cleaned_data.get('image')
+        if image:
+            # Перевіряємо розмір файлу (макс 10MB)
+            if image.size > 10 * 1024 * 1024:
+                raise ValidationError('Розмір зображення не повинен перевищувати 10MB')
+            # Перевіряємо формат
+            if not image.content_type.startswith('image/'):
+                raise ValidationError('Можна завантажувати тільки зображення')
+        return image

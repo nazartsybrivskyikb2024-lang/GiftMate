@@ -144,4 +144,35 @@ class SavedItem(models.Model):
         unique_together = ('user', 'gift')
 
 
+class Story(models.Model):
+    """Stories для користувачів (як в Instagram) - видиме 24 години"""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='stories')
+    image = models.ImageField(upload_to='stories/', help_text="Фото для story")
+    title = models.CharField(max_length=200, blank=True, help_text="Заголовок/текст для story")
+    description = models.TextField(max_length=500, blank=True, help_text="Опис")
+    gift = models.ForeignKey(Gift, on_delete=models.SET_NULL, null=True, blank=True, related_name='stories', help_text="Посилання на подарунок")
+    background_color = models.CharField(max_length=7, default='#6366f1', help_text="Колір фону (hex)")
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Story від {self.user.username} ({self.created_at})"
+    
+    def is_expired(self):
+        """Перевіряє чи story вийшла з актуальності (24+ години)"""
+        from django.utils import timezone
+        from datetime import timedelta
+        return timezone.now() - self.created_at > timedelta(hours=24)
+    
+    def is_active(self):
+        """Чи story все ще актуальна"""
+        return not self.is_expired()
+    
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('gifts:story_detail', args=[str(self.id)])
+
+
 

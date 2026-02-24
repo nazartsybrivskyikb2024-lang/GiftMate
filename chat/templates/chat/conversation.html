@@ -150,6 +150,9 @@
               <button type="button" class="btn btn-light desktop-only-btn" id="emoji-button" title="Додати емодзі">
                 <i class="far fa-smile"></i>
               </button>
+              <button type="button" class="btn btn-light desktop-only-btn" id="ai-helper-btn" title="AI помічник">
+                <i class="fas fa-magic"></i>
+              </button>
               <a href="{% url 'chat:forward_saved' conversation.id %}" 
                  class="btn btn-light desktop-only-btn" title="Поділитися подарунком">
                 <i class="fas fa-gift"></i>
@@ -163,6 +166,9 @@
           <div class="mobile-buttons-row">
             <button type="button" class="btn btn-outline-secondary btn-sm flex-fill" id="emoji-button-mobile" title="Емодзі">
               <i class="far fa-smile me-1"></i>Емодзі
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm flex-fill" id="ai-helper-mobile" title="AI">
+              <i class="fas fa-magic me-1"></i>AI Помічник
             </button>
             <a href="{% url 'chat:forward_saved' conversation.id %}" 
                class="btn btn-outline-secondary btn-sm flex-fill" title="Подарунок">
@@ -185,6 +191,297 @@
   const CURRENT_USERNAME = "{{ request.user.username|escapejs }}";
 </script>
 <script src="{% static 'chat/chat.js' %}"></script>
+
+<!-- AI Helper Modal -->
+<div class="modal fade" id="aiHelperModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-magic me-2"></i>AI Помічник</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <ul class="nav nav-tabs mb-3" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tab-recommend" data-bs-toggle="tab" data-bs-target="#content-recommend">
+              Рекомендація
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-ideas" data-bs-toggle="tab" data-bs-target="#content-ideas">
+              Ідеї
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-occasion" data-bs-toggle="tab" data-bs-target="#content-occasion">
+              До нагоди
+            </button>
+          </li>
+        </ul>
+
+        <div class="tab-content">
+          <!-- Recommendation Tab -->
+          <div class="tab-pane fade show active" id="content-recommend" role="tabpanel">
+            <div class="mb-3">
+              <label class="form-label">Нагода</label>
+              <input type="text" class="form-control" id="ai-occasion" placeholder="Наприклад: день народження, свідання">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Бюджет (грн)</label>
+              <input type="number" class="form-control" id="ai-budget" placeholder="Наприклад: 500">
+            </div>
+            <button class="btn btn-primary w-100" onclick="getAIRecommendation()">
+              <span id="btn-recommend-text">Отримати рекомендацію</span>
+              <span id="btn-recommend-loader" style="display:none;">
+                <span class="spinner-border spinner-border-sm me-2"></span>Завантаження...
+              </span>
+            </button>
+            <div id="ai-recommendation" class="mt-3"></div>
+          </div>
+
+          <!-- Ideas Tab -->
+          <div class="tab-pane fade" id="content-ideas" role="tabpanel">
+            <div class="mb-3">
+              <label class="form-label">Інтереси (розділені комами)</label>
+              <textarea class="form-control" id="ai-interests" placeholder="Наприклад: спорт, музика, живопис" rows="3"></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Кількість ідей</label>
+              <input type="number" class="form-control" id="ai-count" value="3" min="1" max="10">
+            </div>
+            <button class="btn btn-primary w-100" onclick="getAIIdeas()">
+              <span id="btn-ideas-text">Отримати ідеї</span>
+              <span id="btn-ideas-loader" style="display:none;">
+                <span class="spinner-border spinner-border-sm me-2"></span>Завантаження...
+              </span>
+            </button>
+            <div id="ai-ideas" class="mt-3"></div>
+          </div>
+
+          <!-- Occasion Tab -->
+          <div class="tab-pane fade" id="content-occasion" role="tabpanel">
+            <div class="mb-3">
+              <label class="form-label">Нагода</label>
+              <select class="form-select" id="ai-occ-select">
+                <option value="">Виберіть нагоду...</option>
+                <option value="день народження">День народження</option>
+                <option value="8 березня">8 березня</option>
+                <option value="Новий рік">Новий рік</option>
+                <option value="річниця">Річниця</option>
+                <option value="весілля">Весілля</option>
+                <option value="День святого Валентина">День святого Валентина</option>
+                <option value="інша">Інша...</option>
+              </select>
+              <input type="text" class="form-control mt-2" id="ai-occ-custom" placeholder="Опишіть нагоду" style="display:none;">
+            </div>
+            <div class="row">
+              <div class="col-6">
+                <label class="form-label">Мін. бюджет</label>
+                <input type="number" class="form-control" id="ai-budget-min" placeholder="Від">
+              </div>
+              <div class="col-6">
+                <label class="form-label">Макс. бюджет</label>
+                <input type="number" class="form-control" id="ai-budget-max" placeholder="До">
+              </div>
+            </div>
+            <button class="btn btn-primary w-100 mt-3" onclick="getAIOccasion()">
+              <span id="btn-occasion-text">Отримати пропозиції</span>
+              <span id="btn-occasion-loader" style="display:none;">
+                <span class="spinner-border spinner-border-sm me-2"></span>Завантаження...
+              </span>
+            </button>
+            <div id="ai-occasion-result" class="mt-3"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрити</button>
+        <button type="button" class="btn btn-success" onclick="insertAITextToChat()" id="btn-insert">
+          <i class="fas fa-share me-2"></i>Поділитись в чаті
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // AI Helper modal button
+  const aiBtn = document.getElementById('ai-helper-btn');
+  const aiBtnMobile = document.getElementById('ai-helper-mobile');
+  const aiModal = new bootstrap.Modal(document.getElementById('aiHelperModal'));
+  
+  if (aiBtn) aiBtn.addEventListener('click', () => aiModal.show());
+  if (aiBtnMobile) aiBtnMobile.addEventListener('click', () => aiModal.show());
+  
+  // Handle custom occasion input
+  const occSelect = document.getElementById('ai-occ-select');
+  const occCustom = document.getElementById('ai-occ-custom');
+  if (occSelect) {
+    occSelect.addEventListener('change', function() {
+      occCustom.style.display = this.value === 'інша' ? 'block' : 'none';
+    });
+  }
+});
+
+let aiCurrentResult = ''; // Store AI result for sharing
+
+async function getAIRecommendation() {
+  const occasion = document.getElementById('ai-occasion').value;
+  const budget = document.getElementById('ai-budget').value;
+  const resultDiv = document.getElementById('ai-recommendation');
+  const btn = document.getElementById('btn-recommend-text');
+  const loader = document.getElementById('btn-recommend-loader');
+  
+  if (!occasion) {
+    alert('Будь ласка, вкажіть нагоду');
+    return;
+  }
+  
+  btn.style.display = 'none';
+  loader.style.display = 'inline';
+  
+  try {
+    const response = await fetch('/chat/ai/recommendation/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      body: JSON.stringify({ occasion, budget })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      aiCurrentResult = data.recommendation;
+      resultDiv.innerHTML = `<div class="alert alert-info"><strong>💡 Рекомендація:</strong><br>${data.recommendation}</div>`;
+    } else {
+      resultDiv.innerHTML = `<div class="alert alert-danger">Помилка: ${data.error}</div>`;
+    }
+  } catch (error) {
+    resultDiv.innerHTML = `<div class="alert alert-danger">Помилка запиту: ${error}</div>`;
+  } finally {
+    btn.style.display = 'inline';
+    loader.style.display = 'none';
+  }
+}
+
+async function getAIIdeas() {
+  const interests = document.getElementById('ai-interests').value.split(',').map(i => i.trim());
+  const count = document.getElementById('ai-count').value;
+  const resultDiv = document.getElementById('ai-ideas');
+  const btn = document.getElementById('btn-ideas-text');
+  const loader = document.getElementById('btn-ideas-loader');
+  
+  if (!interests || interests[0] === '') {
+    alert('Будь ласка, вкажіть інтереси');
+    return;
+  }
+  
+  btn.style.display = 'none';
+  loader.style.display = 'inline';
+  
+  try {
+    const response = await fetch('/chat/ai/ideas/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      body: JSON.stringify({ interests, count })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      aiCurrentResult = data.ideas;
+      resultDiv.innerHTML = `<div class="alert alert-info"><strong>💡 Ідеї:</strong><br><pre style="white-space: pre-wrap;">${data.ideas}</pre></div>`;
+    } else {
+      resultDiv.innerHTML = `<div class="alert alert-danger">Помилка: ${data.error}</div>`;
+    }
+  } catch (error) {
+    resultDiv.innerHTML = `<div class="alert alert-danger">Помилка запиту: ${error}</div>`;
+  } finally {
+    btn.style.display = 'inline';
+    loader.style.display = 'none';
+  }
+}
+
+async function getAIOccasion() {
+  const select = document.getElementById('ai-occ-select').value;
+  const custom = document.getElementById('ai-occ-custom').value;
+  const occasion = select === 'інша' ? custom : select;
+  const budgetMin = document.getElementById('ai-budget-min').value;
+  const budgetMax = document.getElementById('ai-budget-max').value;
+  const resultDiv = document.getElementById('ai-occasion-result');
+  const btn = document.getElementById('btn-occasion-text');
+  const loader = document.getElementById('btn-occasion-loader');
+  
+  if (!occasion) {
+    alert('Будь ласка, виберіть або опишіть нагоду');
+    return;
+  }
+  
+  btn.style.display = 'none';
+  loader.style.display = 'inline';
+  
+  try {
+    const response = await fetch('/chat/ai/suggest/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      body: JSON.stringify({ occasion, budget_min: budgetMin, budget_max: budgetMax })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      aiCurrentResult = data.suggestion;
+      resultDiv.innerHTML = `<div class="alert alert-info"><strong>🎁 Пропозиції:</strong><br><pre style="white-space: pre-wrap;">${data.suggestion}</pre></div>`;
+    } else {
+      resultDiv.innerHTML = `<div class="alert alert-danger">Помилка: ${data.error}</div>`;
+    }
+  } catch (error) {
+    resultDiv.innerHTML = `<div class="alert alert-danger">Помилка запиту: ${error}</div>`;
+  } finally {
+    btn.style.display = 'inline';
+    loader.style.display = 'none';
+  }
+}
+
+function insertAITextToChat() {
+  if (!aiCurrentResult) {
+    alert('Спочатку отримайте результат від AI');
+    return;
+  }
+  
+  const messageInput = document.getElementById('message-input');
+  messageInput.value = aiCurrentResult.substring(0, 1000); // Limit to 1000 chars
+  messageInput.focus();
+  
+  const modal = bootstrap.Modal.getInstance(document.getElementById('aiHelperModal'));
+  modal.hide();
+}
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+</script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const emojiBtn = document.getElementById('emoji-button');

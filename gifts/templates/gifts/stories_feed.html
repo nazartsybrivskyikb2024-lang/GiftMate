@@ -1,0 +1,266 @@
+{% extends 'gifts/base.html' %}
+{% load static %}
+
+{% block title %}Stories - GiftMate{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">
+                    <i class="fas fa-film"></i> Історії друзів
+                </h2>
+                <a href="{% url 'gifts:create_story' %}" class="btn btn-primary">
+                    <i class="fas fa-plus-circle"></i> Створити історію
+                </a>
+            </div>
+            <p class="text-muted mt-2">
+                Історії доступні протягом 24 годин
+            </p>
+        </div>
+    </div>
+
+    <!-- Stories Circle View -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="stories-container d-flex overflow-auto pb-3" style="gap: 15px;">
+                {% if stories_by_user %}
+                    {% for user_id, data in stories_by_user.items %}
+                    <div class="story-circle-wrapper" onclick="openStory({{ data.stories.0.id }})">
+                        <div class="story-circle">
+                            {% if data.profile.avatar %}
+                                <img src="{{ data.profile.avatar.url }}" 
+                                     alt="{{ data.user.username }}"
+                                     class="story-avatar">
+                            {% else %}
+                                <div class="story-avatar-placeholder">{{ data.user.username.0|upper }}</div>
+                            {% endif %}
+                            <div class="story-badge">{{ data.count }}</div>
+                        </div>
+                        <p class="story-username text-center mt-2" style="font-size: 12px; max-width: 80px;">
+                            {{ data.user.username }}
+                        </p>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="alert alert-info w-100">
+                    <i class="fas fa-info-circle"></i>
+                    Поки немає історій. <a href="{% url 'gifts:friend_list' %}">Додайте друзів</a>, щоб побачити їх історії!
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Stories Grid -->
+    <div class="row">
+        <div class="col-md-12">
+            <h4 class="mb-3">Останні історії</h4>
+            {% if stories_by_user %}
+                <div class="row g-3">
+                    {% for user_id, data in stories_by_user.items %}
+                        {% for story in data.stories %}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card story-card h-100 cursor-pointer" onclick="openStory({{ story.id }})">
+                                    <div class="story-image-container" style="background-color: {{ story.background_color }};">
+                                        {% if story.image %}
+                                            <img src="{{ story.image.url }}" 
+                                                 alt="{{ story.title }}"
+                                                 class="card-img-top story-image">
+                                        {% endif %}
+                                        
+                                        <!-- Overlay with user info -->
+                                        <div class="story-overlay">
+                                            <div class="d-flex align-items-center">
+                                                {% if data.profile.avatar %}
+                                                    <img src="{{ data.profile.avatar.url }}" 
+                                                         alt="{{ data.user.username }}"
+                                                         class="rounded-circle me-2"
+                                                         width="40" height="40">
+                                                {% else %}
+                                                    <div class="rounded-circle me-2 bg-primary text-white d-flex align-items-center justify-content-center"
+                                                         style="width: 40px; height: 40px; font-weight: bold;">
+                                                        {{ data.user.username.0|upper }}
+                                                    </div>
+                                                {% endif %}
+                                                <div>
+                                                    <p class="mb-0 fw-bold">{{ data.user.username }}</p>
+                                                    <small class="text-muted">
+                                                        {% now "U" as current_time %}
+                                                        {% if story.created_at.date == current_time|date:"Y-m-d" %}
+                                                            Сьогодні о {{ story.created_at|date:"H:i" }}
+                                                        {% else %}
+                                                            {{ story.created_at|date:"d.m.Y" }}
+                                                        {% endif %}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card-body">
+                                        {% if story.title %}
+                                            <h5 class="card-title">{{ story.title }}</h5>
+                                        {% endif %}
+                                        {% if story.description %}
+                                            <p class="card-text text-muted" style="font-size: 0.9rem;">
+                                                {{ story.description|truncatewords:15 }}
+                                            </p>
+                                        {% endif %}
+                                        
+                                        {% if story.gift %}
+                                            <div class="mt-2 pt-2 border-top">
+                                                <small class="text-primary">
+                                                    <i class="fas fa-gift"></i>
+                                                    Показує подарунок: {{ story.gift.title }}
+                                                </small>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    Поки немає історій. Будьте першим, хто створить історію!
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- CSS для Stories -->
+<style>
+    .stories-container {
+        scrollbar-width: thin;
+    }
+
+    .stories-container::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .stories-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .stories-container::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+
+    .story-circle-wrapper {
+        flex-shrink: 0;
+        cursor: pointer;
+        text-align: center;
+    }
+
+    .story-circle {
+        position: relative;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        padding: 2px;
+        background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .story-avatar {
+        width: 76px;
+        height: 76px;
+        border-radius: 50%;
+        border: 3px solid white;
+        object-fit: cover;
+    }
+
+    .story-avatar-placeholder {
+        width: 76px;
+        height: 76px;
+        border-radius: 50%;
+        border: 3px solid white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-weight: bold;
+        font-size: 1.5rem;
+    }
+
+    .story-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #6366f1;
+        color: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .story-username {
+        width: 80px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .story-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .story-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .story-image-container {
+        position: relative;
+        height: 300px;
+        overflow: hidden;
+    }
+
+    .story-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .story-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
+        padding: 15px;
+        z-index: 10;
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+    }
+</style>
+
+<!-- JavaScript -->
+<script>
+    function openStory(storyId) {
+        window.location.href = `{% url 'gifts:story_detail' 0 %}`.replace('0', storyId);
+    }
+</script>
+{% endblock %}

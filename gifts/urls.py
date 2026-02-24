@@ -16,6 +16,16 @@ urlpatterns = [
     path('gift/<int:gift_id>/', views.gift_detail, name='gift_detail'),
     path('gift/<int:gift_id>/comment/', views.add_comment, name='add_comment'),
     
+    # AI Chat support
+    path('ai-chat/', views.ai_chat, name='ai_chat'),
+    
+    # Stories support
+    path('stories/', views.stories_feed, name='stories_feed'),
+    path('stories/create/', views.create_story, name='create_story'),
+    path('stories/<int:story_id>/', views.story_detail, name='story_detail'),
+    path('stories/<int:story_id>/delete/', views.delete_story, name='delete_story'),
+    path('api/stories/', views.story_api_list, name='story_api_list'),
+    
     # Friend system URLs
     path('find/', friend_views.find_users, name='find_users'),
     path('friends/', friend_views.friend_list, name='friend_list'),

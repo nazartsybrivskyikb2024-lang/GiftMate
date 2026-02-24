@@ -1,0 +1,325 @@
+{% extends 'gifts/base.html' %}
+{% load static %}
+
+{% block title %}Story - GiftMate{% endblock %}
+
+{% block content %}
+<div class="story-viewer-container">
+    <!-- Progress Bar -->
+    <div class="story-progress-bar">
+        <div class="progress-fill" id="progressBar"></div>
+    </div>
+
+    <!-- Story Content -->
+    <div class="story-content" style="background-color: {{ story.background_color }};">
+        {% if story.image %}
+            <img src="{{ story.image.url }}" 
+                 alt="{{ story.title }}"
+                 class="story-main-image">
+        {% endif %}
+
+        <!-- Story Info Overlay -->
+        <div class="story-info-overlay">
+            <!-- Header -->
+            <div class="story-header">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        {% if story.user.profile.avatar %}
+                            <img src="{{ story.user.profile.avatar.url }}" 
+                                 alt="{{ story.user.username }}"
+                                 class="rounded-circle me-2"
+                                 width="50" height="50">
+                        {% else %}
+                            <div class="rounded-circle me-2 bg-primary text-white d-flex align-items-center justify-content-center"
+                                 style="width: 50px; height: 50px; font-weight: bold; font-size: 1.2rem;">
+                                {{ story.user.username.0|upper }}
+                            </div>
+                        {% endif %}
+                        <div>
+                            <p class="mb-0 fw-bold text-white">{{ story.user.username }}</p>
+                            <small class="text-light">
+                                {% now "U" as current_time %}
+                                {% if story.created_at.date == current_time|date:"Y-m-d" %}
+                                    Сьогодні о {{ story.created_at|date:"H:i" }}
+                                {% else %}
+                                    {{ story.created_at|date:"d.m.Y" }}
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    <a href="{% url 'gifts:stories_feed' %}" class="btn btn-sm btn-light">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Story Text Content -->
+            {% if story.title or story.description %}
+            <div class="story-text-content">
+                {% if story.title %}
+                    <h3 class="text-white fw-bold">{{ story.title }}</h3>
+                {% endif %}
+                {% if story.description %}
+                    <p class="text-light">{{ story.description }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Gift Link -->
+            {% if story.gift %}
+            <div class="story-gift-link">
+                <a href="{{ story.gift.get_absolute_url }}" class="gift-badge">
+                    <img src="{{ story.gift.image.url }}" alt="{{ story.gift.title }}" width="40" height="40">
+                    <div>
+                        <p class="mb-0 fw-bold">{{ story.gift.title }}</p>
+                        <small>Переглянути подарунок</small>
+                    </div>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Navigation Buttons -->
+        {% if prev_story %}
+        <a href="{% url 'gifts:story_detail' prev_story %}" class="story-nav-btn story-nav-prev">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        {% endif %}
+
+        {% if next_story %}
+        <a href="{% url 'gifts:story_detail' next_story %}" class="story-nav-btn story-nav-next">
+            <i class="fas fa-chevron-right"></i>
+        </a>
+        {% endif %}
+
+        <!-- Story Counter -->
+        <div class="story-counter">
+            {{ current_index }} / {{ total_stories }}
+        </div>
+    </div>
+</div>
+
+<!-- CSS для Story Viewer -->
+<style>
+    .story-viewer-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #000;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .story-progress-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.3);
+        z-index: 10;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: white;
+        width: 0%;
+        animation: progressFill 5s linear forwards;
+    }
+
+    @keyframes progressFill {
+        from {
+            width: 0%;
+        }
+        to {
+            width: 100%;
+        }
+    }
+
+    .story-content {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        max-width: 400px;
+        aspect-ratio: 9 / 16;
+        background-size: cover;
+        background-position: center;
+    }
+
+    .story-main-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .story-info-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.5) 100%);
+        display: flex;
+        flex-direction: column;
+        padding: 15px;
+        z-index: 5;
+    }
+
+    .story-header {
+        flex-shrink: 0;
+    }
+
+    .story-text-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: white;
+    }
+
+    .story-text-content h3 {
+        font-size: 1.8rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        margin-bottom: 10px;
+    }
+
+    .story-text-content p {
+        font-size: 1rem;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .story-gift-link {
+        flex-shrink: 0;
+        margin-top: auto;
+    }
+
+    .gift-badge {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 12px 15px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #000;
+        transition: all 0.2s;
+    }
+
+    .gift-badge:hover {
+        background: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .gift-badge img {
+        border-radius: 5px;
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+    }
+
+    .gift-badge p, .gift-badge small {
+        color: #000;
+    }
+
+    .story-nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        color: white;
+        font-size: 24px;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.2s;
+        z-index: 15;
+    }
+
+    .story-nav-btn:hover {
+        background: rgba(255, 255, 255, 0.4);
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .story-nav-prev {
+        left: 15px;
+    }
+
+    .story-nav-next {
+        right: 15px;
+    }
+
+    .story-counter {
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 5px;
+        font-size: 0.9rem;
+        z-index: 10;
+    }
+
+    @media (max-width: 768px) {
+        .story-nav-btn {
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+        }
+
+        .story-text-content h3 {
+            font-size: 1.3rem;
+        }
+
+        .story-text-content p {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<!-- JavaScript для автозагрузки наступної історії -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Автоматичний перехід на наступну історію через 5 секунд
+        const nextStoryLink = document.querySelector('.story-nav-next');
+        if (nextStoryLink) {
+            setTimeout(function() {
+                window.location.href = nextStoryLink.href;
+            }, 5000);
+        } else {
+            // Якщо це остання історія, повернемо до стрічки
+            setTimeout(function() {
+                window.location.href = '{% url "gifts:stories_feed" %}';
+            }, 5000);
+        }
+
+        // Клавіші навігації
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft' && document.querySelector('.story-nav-prev')) {
+                window.location.href = document.querySelector('.story-nav-prev').href;
+            }
+            if (e.key === 'ArrowRight' && document.querySelector('.story-nav-next')) {
+                window.location.href = document.querySelector('.story-nav-next').href;
+            }
+            if (e.key === 'Escape') {
+                window.location.href = '{% url "gifts:stories_feed" %}';
+            }
+        });
+    });
+</script>
+{% endblock %}

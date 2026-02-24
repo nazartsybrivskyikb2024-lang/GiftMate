@@ -185,3 +185,114 @@ def mark_notifications_read(request):
     # Використовуємо related_name='notifications' з моделі User
     request.user.notifications.filter(is_read=False).update(is_read=True)
     return JsonResponse({'status': 'ok'})
+
+
+# ==================== AI ПОМІЧНИК ====================
+
+@login_required
+@require_http_methods(['POST'])
+def get_gift_recommendation(request):
+    """API endpoint для отримання рекомендації подарунку від AI"""
+    from gifts.ai_assistant import get_ai_assistant
+    import json
+    
+    try:
+        data = json.loads(request.body)
+        occasion = data.get('occasion', '')
+        budget = data.get('budget', '')
+        
+        assistant = get_ai_assistant()
+        if not assistant:
+            return JsonResponse({
+                'error': 'AI сервіс недоступний',
+                'recommendation': 'Будь ласка, налаштуйте GEMINI_API_KEY у settings.py'
+            }, status=503)
+        
+        # Отримуємо профіль користувача для кращих рекомендацій
+        user_profile = request.user.profile if hasattr(request.user, 'profile') else None
+        
+        recommendation = assistant.get_gift_recommendation(
+            user_profile=user_profile,
+            occasion=occasion,
+            budget=budget
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'recommendation': recommendation
+        })
+    
+    except Exception as e:
+        return JsonResponse({
+            'error': str(e),
+            'success': False
+        }, status=400)
+
+
+@login_required
+@require_http_methods(['POST'])
+def get_gift_ideas(request):
+    """API endpoint для отримання ідей подарунків"""
+    from gifts.ai_assistant import get_ai_assistant
+    import json
+    
+    try:
+        data = json.loads(request.body)
+        interests = data.get('interests', [])
+        count = data.get('count', 3)
+        
+        assistant = get_ai_assistant()
+        if not assistant:
+            return JsonResponse({
+                'error': 'AI сервіс недоступний'
+            }, status=503)
+        
+        ideas = assistant.get_gift_ideas(interests=interests, count=count)
+        
+        return JsonResponse({
+            'success': True,
+            'ideas': ideas
+        })
+    
+    except Exception as e:
+        return JsonResponse({
+            'error': str(e),
+            'success': False
+        }, status=400)
+
+
+@login_required
+@require_http_methods(['POST'])
+def suggest_for_occasion(request):
+    """API endpoint для рекомендацій до конкретної нагоди"""
+    from gifts.ai_assistant import get_ai_assistant
+    import json
+    
+    try:
+        data = json.loads(request.body)
+        occasion = data.get('occasion', '')
+        budget_min = data.get('budget_min')
+        budget_max = data.get('budget_max')
+        
+        assistant = get_ai_assistant()
+        if not assistant:
+            return JsonResponse({
+                'error': 'AI сервіс недоступний'
+            }, status=503)
+        
+        suggestion = assistant.suggest_for_occasion(
+            occasion=occasion,
+            budget_min=budget_min,
+            budget_max=budget_max
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'suggestion': suggestion
+        })
+    
+    except Exception as e:
+        return JsonResponse({
+            'error': str(e),
+            'success': False
+        }, status=400)
